@@ -14,6 +14,7 @@ import MacroDistributionChart from '../components/graphs/MacroDistributionChart'
 import NutritionBalanceRating from '../components/graphs/NutritionBalanceRating';
 import WeeklySummaryCard from '../components/graphs/WeeklySummaryCard';
 import MaintenanceCaloriesCard from '../components/dashboard/MaintenanceCaloriesCard';
+import BaselineHealthCard from '../components/dashboard/BaselineHealthCard';
 import { calculateWeeklySummary } from '../utils/weeklyFeedback';
 import { GoalType } from '@/backend';
 
@@ -120,6 +121,9 @@ export default function DashboardPage() {
         todayCalories={todayTotals.calories}
         userProfile={userProfile ?? null}
       />
+
+      {/* Baseline Health Card */}
+      <BaselineHealthCard />
 
       {bodyGoal && (
         <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">

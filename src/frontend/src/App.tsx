@@ -8,6 +8,7 @@ import CameraCapturePage from './pages/CameraCapturePage';
 import HelperChatPage from './pages/HelperChatPage';
 import LoginPage from './pages/LoginPage';
 import InstallAppPage from './pages/InstallAppPage';
+import HealthRecordsPage from './pages/HealthRecordsPage';
 import ProfileSetupDialog from './components/auth/ProfileSetupDialog';
 
 function RootLayout() {
@@ -52,7 +53,20 @@ const installAppRoute = createRoute({
   component: InstallAppPage,
 });
 
-const routeTree = rootRoute.addChildren([indexRoute, addEntryRoute, cameraRoute, chatRoute, installAppRoute]);
+const healthRecordsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/health-records',
+  component: HealthRecordsPage,
+});
+
+const routeTree = rootRoute.addChildren([
+  indexRoute,
+  addEntryRoute,
+  cameraRoute,
+  chatRoute,
+  installAppRoute,
+  healthRecordsRoute,
+]);
 
 const router = createRouter({ routeTree });
 

@@ -1,125 +1,90 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Android sideload distribution docs, branding consistency, and single-source display name configurability",
+  "title": "Health Records UI for baseline labs & vitals tracking",
   "requirements": [
     {
-      "id": "REQ-41",
-      "summary": "Update Android wrapper documentation for sideload distribution, including release build steps, production URL configuration, and end-user installation steps.",
+      "id": "REQ-57",
+      "summary": "Add an authenticated Health Records UI where users can add and view personal lab/vitals track record entries (hemoglobin, platelets, BP systolic, BP diastolic) in English.",
       "acceptanceCriteria": [
-        "`frontend/android-wrapper/README.md` contains an explicit section for sideload distribution (outside Play Store).",
-        "README includes the exact Gradle property to set for the production web URL (`nutriscan.baseUrl`) and an example value.",
-        "README includes steps to produce a release artifact (APK and/or AAB) using Android Studio and/or Gradle CLI.",
-        "README includes end-user installation steps for the generated APK (sideload), with any required device settings noted."
+        "App includes a reachable Health Records page or section while logged in.",
+        "The UI provides an “Add Record” form that supports: Hemoglobin, Platelets, Blood Pressure (High/Systolic), Blood Pressure (Low/Diastolic).",
+        "The form collects value and date (and unit if not implied) and prevents submission with invalid/empty values, showing an English validation message.",
+        "After saving, the new record appears in the records list without requiring a full page refresh (React Query invalidation/refetch pattern).",
+        "The records list shows type, value + unit, and date, sorted newest-first."
       ],
       "file_operations": [
         {
-          "path": "frontend/android-wrapper/README.md",
-          "operation": "modify",
-          "description": "Rewrite/expand the documentation to include a dedicated “Sideload (Outside Play Store)” section: (1) how to set the production canister URL via the Gradle property `nutriscan.baseUrl` (include an explicit example value), (2) how to build signed/unsigned release artifacts (APK and AAB) via Android Studio and Gradle CLI, and (3) clear end-user sideload install steps (unknown sources/install unknown apps setting, locating the APK, install, and basic troubleshooting). Also remove/adjust Play Store-specific framing so sideload is a first-class flow."
-        }
-      ]
-    },
-    {
-      "id": "REQ-42",
-      "summary": "Fix Android wrapper branding consistency by aligning theme/style naming and ensuring the launcher label uses @string/app_name without build errors.",
-      "acceptanceCriteria": [
-        "Android wrapper still builds (debug and release) with no resource/theme resolution errors.",
-        "The launcher label shown on Android uses the user-facing app name from `@string/app_name` (currently \"Calorieshivam\") in `frontend/android-wrapper/app/src/main/res/values/strings.xml`.",
-        "Any internal Android theme/style naming that still references an old app name (e.g., `Theme.Calorieman`) is updated to be consistent, and `AndroidManifest.xml` references the updated theme correctly."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/android-wrapper/app/src/main/res/values/themes.xml",
-          "operation": "modify",
-          "description": "Rename the app theme/style away from leftover internal naming (e.g., change `Theme.Calorieman` to a consistent current theme name) while preserving the actual theme configuration items/colors, ensuring no resource resolution issues in debug/release builds."
-        },
-        {
-          "path": "frontend/android-wrapper/app/src/main/AndroidManifest.xml",
-          "operation": "modify",
-          "description": "Update the application theme reference to the renamed consistent theme, keeping the launcher label as `android:label=\"@string/app_name\"` and preserving technical identifiers (package name, resource keys) unless strictly necessary for build correctness."
-        },
-        {
-          "path": "frontend/android-wrapper/app/src/main/java/com/nutriscan/wrapper/MainActivity.kt",
-          "operation": "modify",
-          "description": "Update any leftover internal naming references in comments/strings (e.g., references to an old app name) to be consistent with the current wrapper/web-app naming, without changing technical identifiers or runtime behavior."
-        }
-      ]
-    },
-    {
-      "id": "REQ-43",
-      "summary": "Add an in-web “Install App” entry point with English instructions explaining the Android sideload app and where the APK comes from.",
-      "acceptanceCriteria": [
-        "The web UI has a visible “Install App” link/button accessible to logged-out users (e.g., on the Login page) and/or logged-in users (e.g., in the header or settings/help area).",
-        "Clicking “Install App” opens a page/section/modal with concise English instructions for Android installation (sideload) and a pointer to where the APK comes from (repository build artifact / provided APK).",
-        "All user-facing text added for this feature is in English."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/InstallAppPage.tsx",
+          "path": "frontend/src/pages/HealthRecordsPage.tsx",
           "operation": "create",
-          "description": "Create an “Install App” page with concise English text explaining: the Android app is a packaged WebView version of the web app, how users obtain the APK (provided by the owner/repository build artifact), and high-level sideload steps (enable install unknown apps, install APK, open app). Use existing UI primitives by composing (do not modify files under `frontend/src/components/ui`)."
+          "description": "Create an authenticated Health Records page with an English “Add Record” form (metric type selector + numeric value + date + unit display where applicable) and a newest-first records list rendering type, value+unit, and date. Compose existing shadcn/ui components (do not edit frontend/src/components/ui). Use the authorization component’s frontend guidance to ensure this page only appears for signed-in users and to handle backend authorization errors gracefully. Verify the component's usage instructions before implementing."
         },
+        {
+          "path": "frontend/src/hooks/useHealthRecords.ts",
+          "operation": "create",
+          "description": "Add React Query hooks for Health Records: (1) query to fetch the caller’s records list, and (2) mutation to add a new record, with React Query invalidation/refetch so newly saved records appear without a full refresh. Ensure errors (including authorization traps) are surfaced as small English messages/toasts. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/backend.d.ts",
+          "operation": "modify",
+          "description": "Update the frontend backend interface typings to match the new backend capabilities for creating and listing per-user health track record entries (including date/day identifier, metric type, value, and unit where applicable), so the Health Records hooks/page can call the new backend functions in a type-safe way."
+        }
+      ]
+    },
+    {
+      "id": "REQ-58",
+      "summary": "Add logged-in navigation entry points to Health Records using the existing TanStack Router pattern without disrupting existing flows.",
+      "acceptanceCriteria": [
+        "There is a visible navigation entry point to Health Records from the logged-in UI (e.g., header nav and/or dashboard quick action).",
+        "Navigation uses the existing TanStack Router route setup pattern in frontend/src/App.tsx.",
+        "All user-facing labels for the new navigation item and page are in English."
+      ],
+      "file_operations": [
         {
           "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Register and wire the new `/install-app` route so it is reachable via navigation, ensuring it is accessible when the user is logged out (i.e., not blocked behind the authenticated router)."
-        },
-        {
-          "path": "frontend/src/pages/LoginPage.tsx",
-          "operation": "modify",
-          "description": "Add a visible “Install App” link/button (English text) for logged-out users that navigates to the new `/install-app` page, using existing composed UI components (do not modify `frontend/src/components/ui`)."
+          "description": "Register a new TanStack Router route for the Health Records page (e.g., /health-records) using the existing createRoute + routeTree.addChildren pattern, ensuring it remains behind the existing AuthGate (signed-in experience)."
         },
         {
           "path": "frontend/src/components/layout/AppHeader.tsx",
           "operation": "modify",
-          "description": "Add an “Install App” navigation entry for logged-in users (English label) that routes to `/install-app`, without changing any read-only UI component implementations under `frontend/src/components/ui`."
+          "description": "Add an English navigation button/link for “Health Records” to the existing logged-in header navigation, following the current Button-based nav pattern and keeping existing items unchanged."
+        },
+        {
+          "path": "frontend/src/pages/DashboardPage.tsx",
+          "operation": "modify",
+          "description": "Add a small, non-disruptive English entry point (e.g., a secondary button or compact card action) that navigates to the Health Records route from the dashboard while preserving existing dashboard, logging, scanning, chat, and install flows."
         }
       ]
     },
     {
-      "id": "REQ-44",
-      "summary": "Make the user-facing display name configurable from a single place for the web UI, and document the single change-point for both web display name and Android app_name.",
+      "id": "REQ-59",
+      "summary": "Show a compact read-only Baseline Health summary card (latest hemoglobin/platelets/BP systolic/BP diastolic) in a consistently visible logged-in location with graceful failure handling.",
       "acceptanceCriteria": [
-        "There is one documented place to change the display name for the web app, and all existing UI locations update accordingly (header brand label, login title, image alt text, browser tab title).",
-        "There is one documented place to change the display name for the Android wrapper (`app_name`) and it is referenced consistently as the launcher label.",
-        "Documentation explicitly states that technical identifiers (e.g., Android package name `com.nutriscan.wrapper`, resource key `nutriscan_base_url`) must remain unchanged unless required for build correctness."
+        "Dashboard (or another consistently visible logged-in location) shows a compact “Baseline Health” summary when at least one record exists.",
+        "The summary displays the latest available value for each metric type; missing metrics are either omitted or shown as “Not set” (English).",
+        "If the snapshot query fails, the UI degrades gracefully (no app crash) and shows a small English fallback message (e.g., “Could not load baseline health data”)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/config/appBranding.ts",
+          "path": "frontend/src/hooks/useBaselineHealthSnapshot.ts",
           "operation": "create",
-          "description": "Add a single-source web branding configuration (e.g., exported constants for app display name and logo alt text) to be used across the web UI and for setting the browser tab title."
+          "description": "Create a React Query hook to fetch the caller’s baseline snapshot from the backend (latest per metric), returning structured loading/error state. Ensure failures are handled without throwing UI-breaking errors and provide a clear English fallback state. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/components/layout/AppHeader.tsx",
-          "operation": "modify",
-          "description": "Replace hard-coded brand text and logo alt text with values from `frontend/src/config/appBranding.ts` so changing one place updates the header brand label and alt text."
+          "path": "frontend/src/components/dashboard/BaselineHealthCard.tsx",
+          "operation": "create",
+          "description": "Implement a compact, read-only “Baseline Health” summary card component that displays latest values for hemoglobin, platelets, BP systolic, and BP diastolic when present; show missing metrics as “Not set” (English) or omit them; and show an English fallback message if the snapshot query fails. Compose existing shadcn/ui components (do not edit frontend/src/components/ui)."
         },
         {
-          "path": "frontend/src/pages/LoginPage.tsx",
+          "path": "frontend/src/pages/DashboardPage.tsx",
           "operation": "modify",
-          "description": "Replace hard-coded login title and logo alt text with values from `frontend/src/config/appBranding.ts` so changing one place updates the login view branding."
+          "description": "Wire the BaselineHealthCard into the dashboard in a compact, consistently visible section, rendering it only when at least one baseline metric exists and ensuring the dashboard remains stable even if the snapshot fails to load."
         },
         {
-          "path": "frontend/src/components/layout/AppLayout.tsx",
+          "path": "frontend/src/backend.d.ts",
           "operation": "modify",
-          "description": "Set/update the browser tab title based on the single-source value from `frontend/src/config/appBranding.ts` (e.g., via a layout-level effect) so it stays consistent across the app."
-        },
-        {
-          "path": "frontend/index.html",
-          "operation": "modify",
-          "description": "Adjust the initial static HTML <title> to a generic/compatible base title that is then overridden at runtime by the app branding configuration, ensuring no user-facing text conflicts with the configured display name."
-        },
-        {
-          "path": "frontend/android-wrapper/app/src/main/res/values/strings.xml",
-          "operation": "modify",
-          "description": "Ensure the Android user-facing app name remains controlled from a single place (`@string/app_name`) and keep the launcher label consistent with it; update comments if needed to clarify what is safe to change vs. what must remain unchanged."
-        },
-        {
-          "path": "frontend/android-wrapper/README.md",
-          "operation": "modify",
-          "description": "Add a “Branding / App Name Configuration” section documenting: (1) the single web change-point (`frontend/src/config/appBranding.ts`) and which UI locations it controls (header/login/title/alt text), (2) the single Android change-point (`frontend/android-wrapper/app/src/main/res/values/strings.xml` `app_name`) and that `AndroidManifest.xml` uses `@string/app_name`, and (3) an explicit note that technical identifiers (Android package name, resource keys like `nutriscan_base_url`, and Gradle property key `nutriscan.baseUrl`) must remain unchanged unless required for build correctness."
+          "description": "Update baseline snapshot typings (if needed) to reflect the dedicated backend query used for the Baseline Health card, ensuring the snapshot data can represent missing metrics without trapping."
         }
       ]
     }

@@ -1,17 +1,15 @@
 import Array "mo:core/Array";
 import Map "mo:core/Map";
 import Iter "mo:core/Iter";
-import Runtime "mo:core/Runtime";
-import Principal "mo:core/Principal";
 import Float "mo:core/Float";
 import Nat "mo:core/Nat";
 import Int "mo:core/Int";
 import Order "mo:core/Order";
+import Runtime "mo:core/Runtime";
+import Principal "mo:core/Principal";
 
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
-
-
 
 actor {
   let accessControlState = AccessControl.initState();
@@ -78,14 +76,14 @@ actor {
     confidenceLevel : Float;
   };
 
-  type QuestionSuggestion = {
+  public type QuestionSuggestion = {
     question : Text;
     answer : Text;
     citations : [Text];
     relatedQuestions : [Text];
   };
 
-  type WeeklyFeedback = {
+  public type WeeklyFeedback = {
     feedbackType : FeedbackType;
     entriesChecked : Nat;
     avgCalories : Float;
@@ -95,13 +93,49 @@ actor {
     entriesPerDay : Float;
   };
 
-  type FeedbackType = {
+  public type FeedbackType = {
     #overrange;
     #underrange;
     #offBalance;
     #goodJob;
     #partialFocus;
     #notEnoughData;
+  };
+
+  // Labs & vitals expansion
+  public type LabVitalsMetrics = {
+    hemoglobin : ?Float;
+    hematocrit : ?Float;
+    whiteBloodCells : ?Float;
+    platelets : ?Float;
+    systolicBP : ?Nat;
+    diastolicBP : ?Nat;
+    pulse : ?Nat;
+    glucoseFasting : ?Float;
+    hba1c : ?Float;
+    cholesterolTot : ?Float;
+  };
+
+  public type HealthTrackRecord = {
+    timestamp : Int;
+    day : Int;
+    hemoglobin : ?Float;
+    hematocrit : ?Float;
+    whiteBloodCells : ?Float;
+    platelets : ?Float;
+    systolicBP : ?Nat;
+    diastolicBP : ?Nat;
+    pulse : ?Nat;
+    glucoseFasting : ?Float;
+    hba1c : ?Float;
+    cholesterolTot : ?Float;
+  };
+
+  public type BaselineSnapshot = {
+    metric : Text;
+    value : Text;
+    measurementType : { #blood; #vitals };
+    timestamp : Int;
   };
 
   module FoodEntry {
@@ -113,6 +147,7 @@ actor {
   let userProfiles = Map.empty<Principal, UserProfile>();
   var nextEntryId = 0;
   let foodEntries = Map.empty<Nat, FoodEntry>();
+  let healthTrackRecords = Map.empty<Principal, [HealthTrackRecord]>();
 
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
@@ -166,7 +201,7 @@ actor {
           bmi = weightKg / heightSquaredMeters;
           bmiCategory = classifyBMI(weightKg / heightSquaredMeters);
           bmr;
-          tdee = calculateTDEE(// Calculate BMR via helper
+          tdee = calculateTDEE(
             calculateBMR(profile, weightKg, heightCm),
             switch (profile.activityLevel) {
               case (null) { #moderatelyActive };
@@ -448,6 +483,106 @@ actor {
       totalCarbs;
       totalFat;
       entriesPerDay;
+    };
+  };
+
+  //---------------------------------------------------
+  // Labs & vitals tracking (extension)
+  //---------------------------------------------------
+  public shared ({ caller }) func addLabVitalsSnapshot(snapshot : LabVitalsMetrics) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can add lab/vitals data");
+    };
+
+    let now = 0;
+    let day = 0;
+
+    let record : HealthTrackRecord = {
+      timestamp = now;
+      day;
+      hemoglobin = snapshot.hemoglobin;
+      hematocrit = snapshot.hematocrit;
+      whiteBloodCells = snapshot.whiteBloodCells;
+      platelets = snapshot.platelets;
+      systolicBP = snapshot.systolicBP;
+      diastolicBP = snapshot.diastolicBP;
+      pulse = snapshot.pulse;
+      glucoseFasting = snapshot.glucoseFasting;
+      hba1c = snapshot.hba1c;
+      cholesterolTot = snapshot.cholesterolTot;
+    };
+
+    let existingRecords = switch (healthTrackRecords.get(caller)) {
+      case (null) { [] };
+      case (?records) { records };
+    };
+
+    let updatedRecords = existingRecords.concat([record]);
+    healthTrackRecords.add(caller, updatedRecords);
+  };
+
+  public query ({ caller }) func getLabVitalsBaseline() : async [BaselineSnapshot] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can get their lab/vitals baseline");
+    };
+
+    let records = switch (healthTrackRecords.get(caller)) {
+      case (null) { [] };
+      case (?records) { records };
+    };
+
+    let baseline : [BaselineSnapshot] = [
+      getMostRecent(records, "Hemoglobin", "blood", func(r) { switch (r.hemoglobin) { case (null) { 0.0 }; case (?v) { v } } }),
+      getMostRecent(records, "Hematocrit", "blood", func(r) { switch (r.hematocrit) { case (null) { 0.0 }; case (?v) { v } } }),
+      getMostRecent(records, "WBC", "blood", func(r) { switch (r.whiteBloodCells) { case (null) { 0.0 }; case (?v) { v } } }),
+      getMostRecent(records, "Platelets", "blood", func(r) { switch (r.platelets) { case (null) { 0.0 }; case (?v) { v } } }),
+      getMostRecent(records, "Glucose", "blood", func(r) { switch (r.glucoseFasting) { case (null) { 0.0 }; case (?v) { v } } }),
+      getMostRecent(records, "hba1c", "blood", func(r) { switch (r.hba1c) { case (null) { 0.0 }; case (?v) { v } } }),
+      getMostRecent(records, "cholesterolTot", "blood", func(r) { switch (r.cholesterolTot) { case (null) { 0.0 }; case (?v) { v } } }),
+      getMostRecent(records, "SystolicBP", "vitals", func(r) { (switch (r.systolicBP) { case (null) { 0 }; case (?v) { v } }).toFloat() }),
+      getMostRecent(records, "DiastolicBP", "vitals", func(r) { (switch (r.diastolicBP) { case (null) { 0 }; case (?v) { v } }).toFloat() }),
+      getMostRecent(records, "Pulse", "vitals", func(r) { (switch (r.pulse) { case (null) { 0 }; case (?v) { v } }).toFloat() }),
+    ];
+
+    baseline.filter(
+      func(b) { b.value != "" }
+    );
+  };
+
+  public query ({ caller }) func getFullLabVitalsHistory() : async [HealthTrackRecord] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can get their health history");
+    };
+    switch (healthTrackRecords.get(caller)) {
+      case (null) { [] };
+      case (?records) { records };
+    };
+  };
+
+  func getMostRecent(records : [HealthTrackRecord], metric : Text, measurementType : Text, selectValue : (HealthTrackRecord) -> Float) : BaselineSnapshot {
+    let sorted = records.reverse();
+    let bps = sorted.filter(
+      func(r) {
+        var value : Float = selectValue(r);
+        value > 0.0;
+      }
+    );
+
+    if (bps.size() == 0) {
+      {
+        metric;
+        value = "";
+        measurementType = #blood;
+        timestamp = 0;
+      };
+    } else {
+      {
+        metric;
+        value = selectValue(bps[0]).toText();
+        measurementType =
+          if (measurementType == "blood") { #blood } else { #vitals };
+        timestamp = bps[0].timestamp;
+      };
     };
   };
 };

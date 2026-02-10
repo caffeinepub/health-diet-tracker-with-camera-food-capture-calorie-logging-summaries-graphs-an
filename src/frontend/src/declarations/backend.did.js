@@ -8,6 +8,18 @@
 
 import { IDL } from '@icp-sdk/core/candid';
 
+export const LabVitalsMetrics = IDL.Record({
+  'hematocrit' : IDL.Opt(IDL.Float64),
+  'glucoseFasting' : IDL.Opt(IDL.Float64),
+  'hba1c' : IDL.Opt(IDL.Float64),
+  'cholesterolTot' : IDL.Opt(IDL.Float64),
+  'hemoglobin' : IDL.Opt(IDL.Float64),
+  'systolicBP' : IDL.Opt(IDL.Nat),
+  'diastolicBP' : IDL.Opt(IDL.Nat),
+  'pulse' : IDL.Opt(IDL.Nat),
+  'whiteBloodCells' : IDL.Opt(IDL.Float64),
+  'platelets' : IDL.Opt(IDL.Float64),
+});
 export const UserRole = IDL.Variant({
   'admin' : IDL.Null,
   'user' : IDL.Null,
@@ -67,6 +79,26 @@ export const FoodEntry = IDL.Record({
   }),
   'foodLabel' : IDL.Text,
 });
+export const HealthTrackRecord = IDL.Record({
+  'hematocrit' : IDL.Opt(IDL.Float64),
+  'day' : IDL.Int,
+  'glucoseFasting' : IDL.Opt(IDL.Float64),
+  'hba1c' : IDL.Opt(IDL.Float64),
+  'cholesterolTot' : IDL.Opt(IDL.Float64),
+  'hemoglobin' : IDL.Opt(IDL.Float64),
+  'systolicBP' : IDL.Opt(IDL.Nat),
+  'diastolicBP' : IDL.Opt(IDL.Nat),
+  'timestamp' : IDL.Int,
+  'pulse' : IDL.Opt(IDL.Nat),
+  'whiteBloodCells' : IDL.Opt(IDL.Float64),
+  'platelets' : IDL.Opt(IDL.Float64),
+});
+export const BaselineSnapshot = IDL.Record({
+  'metric' : IDL.Text,
+  'value' : IDL.Text,
+  'timestamp' : IDL.Int,
+  'measurementType' : IDL.Variant({ 'blood' : IDL.Null, 'vitals' : IDL.Null }),
+});
 export const QuestionSuggestion = IDL.Record({
   'relatedQuestions' : IDL.Vec(IDL.Text),
   'question' : IDL.Text,
@@ -115,6 +147,7 @@ export const idlService = IDL.Service({
       [IDL.Nat],
       [],
     ),
+  'addLabVitalsSnapshot' : IDL.Func([LabVitalsMetrics], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'getCallerHealthMetrics' : IDL.Func([], [HealthMetrics], ['query']),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
@@ -124,6 +157,12 @@ export const idlService = IDL.Service({
       [IDL.Vec(FoodEntry)],
       ['query'],
     ),
+  'getFullLabVitalsHistory' : IDL.Func(
+      [],
+      [IDL.Vec(HealthTrackRecord)],
+      ['query'],
+    ),
+  'getLabVitalsBaseline' : IDL.Func([], [IDL.Vec(BaselineSnapshot)], ['query']),
   'getPortionAdjusterGuidance' : IDL.Func([], [IDL.Text], ['query']),
   'getSuggestedQuestions' : IDL.Func(
       [],
@@ -144,6 +183,18 @@ export const idlService = IDL.Service({
 export const idlInitArgs = [];
 
 export const idlFactory = ({ IDL }) => {
+  const LabVitalsMetrics = IDL.Record({
+    'hematocrit' : IDL.Opt(IDL.Float64),
+    'glucoseFasting' : IDL.Opt(IDL.Float64),
+    'hba1c' : IDL.Opt(IDL.Float64),
+    'cholesterolTot' : IDL.Opt(IDL.Float64),
+    'hemoglobin' : IDL.Opt(IDL.Float64),
+    'systolicBP' : IDL.Opt(IDL.Nat),
+    'diastolicBP' : IDL.Opt(IDL.Nat),
+    'pulse' : IDL.Opt(IDL.Nat),
+    'whiteBloodCells' : IDL.Opt(IDL.Float64),
+    'platelets' : IDL.Opt(IDL.Float64),
+  });
   const UserRole = IDL.Variant({
     'admin' : IDL.Null,
     'user' : IDL.Null,
@@ -203,6 +254,29 @@ export const idlFactory = ({ IDL }) => {
     }),
     'foodLabel' : IDL.Text,
   });
+  const HealthTrackRecord = IDL.Record({
+    'hematocrit' : IDL.Opt(IDL.Float64),
+    'day' : IDL.Int,
+    'glucoseFasting' : IDL.Opt(IDL.Float64),
+    'hba1c' : IDL.Opt(IDL.Float64),
+    'cholesterolTot' : IDL.Opt(IDL.Float64),
+    'hemoglobin' : IDL.Opt(IDL.Float64),
+    'systolicBP' : IDL.Opt(IDL.Nat),
+    'diastolicBP' : IDL.Opt(IDL.Nat),
+    'timestamp' : IDL.Int,
+    'pulse' : IDL.Opt(IDL.Nat),
+    'whiteBloodCells' : IDL.Opt(IDL.Float64),
+    'platelets' : IDL.Opt(IDL.Float64),
+  });
+  const BaselineSnapshot = IDL.Record({
+    'metric' : IDL.Text,
+    'value' : IDL.Text,
+    'timestamp' : IDL.Int,
+    'measurementType' : IDL.Variant({
+      'blood' : IDL.Null,
+      'vitals' : IDL.Null,
+    }),
+  });
   const QuestionSuggestion = IDL.Record({
     'relatedQuestions' : IDL.Vec(IDL.Text),
     'question' : IDL.Text,
@@ -251,6 +325,7 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Nat],
         [],
       ),
+    'addLabVitalsSnapshot' : IDL.Func([LabVitalsMetrics], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'getCallerHealthMetrics' : IDL.Func([], [HealthMetrics], ['query']),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
@@ -258,6 +333,16 @@ export const idlFactory = ({ IDL }) => {
     'getFoodEntriesForCaller' : IDL.Func(
         [IDL.Int, IDL.Int],
         [IDL.Vec(FoodEntry)],
+        ['query'],
+      ),
+    'getFullLabVitalsHistory' : IDL.Func(
+        [],
+        [IDL.Vec(HealthTrackRecord)],
+        ['query'],
+      ),
+    'getLabVitalsBaseline' : IDL.Func(
+        [],
+        [IDL.Vec(BaselineSnapshot)],
         ['query'],
       ),
     'getPortionAdjusterGuidance' : IDL.Func([], [IDL.Text], ['query']),

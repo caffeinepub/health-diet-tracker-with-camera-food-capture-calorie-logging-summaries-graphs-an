@@ -1,47 +1,57 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-10T10:26:22.843Z",
-  "summary": "Diff implements centralized web branding config, adds an in-web Install App entry point/page, and updates Android wrapper resources/manifest toward consistent branding. However, the Android wrapper README is truncated in the diff summary so key sideload/Gradle-property/build/install instructions cannot be confirmed, and the browser tab title for logged-out users likely remains the static index.html title because AppLayout (which sets document.title) is only used inside the authenticated router.",
+  "generatedAt": "2026-02-10T12:34:12.394Z",
+  "summary": "Frontend adds a Health Records page, navigation entry, and a Dashboard Baseline Health card with React Query hooks. Backend adds new types for lab/vitals snapshots and baseline data, but the diff evidence does not show a per-entry (type/value/unit/date) track-record model or clear validation/sorting behavior. Some frontend behaviors (date handling and baseline error fallback) do not match acceptance criteria, and several extra metrics/profile-gating features appear beyond the request.",
   "missing_requirements": [
     {
-      "id": "REQ-41",
-      "requirement": "Update Android wrapper documentation for non–Play Store (sideload) distribution, including: explicit sideload section, exact Gradle property `nutriscan.baseUrl` with example, steps to build a release APK/AAB, and end-user APK installation steps.",
-      "reason": "The README diff is truncated right after 'Edit `gradle.properties`:' and does not show the required Gradle property (`nutriscan.baseUrl`) example, release build commands/Android Studio steps, or end-user sideload installation steps; cannot verify they were added.",
+      "id": "REQ-55",
+      "requirement": "Backend data model supports per-record fields: record type, numeric value, unit (where applicable), and a date/time or day identifier; and exposes APIs to create an entry and list entries (newest-first) with per-principal isolation and non-negative validation.",
+      "reason": "Diff shows a snapshot-style record (many optional metrics per record) and a BaselineSnapshot with metric/value as Text, but does not show a per-entry 'record type + numeric value + unit + date' model, nor evidence of unit storage, newest-first sorting, or non-negative validation logic.",
       "evidence": [
-        "frontend/android-wrapper/README.md"
+        "backend/main.mo"
       ]
     },
     {
-      "id": "REQ-44",
-      "requirement": "Single place to change the display name for the web app, updating all existing UI locations including browser tab title (including on the login page).",
-      "reason": "The tab title in `frontend/index.html` remains 'Nutrition Tracker', and the code that sets `document.title` is in `AppLayout`, which is only rendered inside the router (authenticated flow). When logged out, `AuthGate` returns `LoginPage` directly, so the tab title likely does not update to the configured display name for logged-out users.",
+      "id": "REQ-56",
+      "requirement": "Baseline snapshot query returns latest entry per supported metric (hemoglobin, platelets, BP systolic, BP diastolic), and returns missing/empty for absent metrics (without trapping).",
+      "reason": "Frontend hook calls `actor.getLabVitalsBaseline()`, but the diff does not show the backend implementation of this query or how it selects latest-per-metric and represents missing metrics (only types are shown).",
       "evidence": [
-        "frontend/index.html",
-        "frontend/src/components/layout/AppLayout.tsx",
-        "frontend/src/App.tsx"
+        "frontend/src/hooks/useBaselineHealthSnapshot.ts",
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-57",
+      "requirement": "Add Record form collects value and date (and unit if not implied) and saves entries so list shows type, value+unit, and date sorted newest-first.",
+      "reason": "Although the UI collects a date, the mutation sends only a metric snapshot object (no date field) to `addLabVitalsSnapshot`. Additionally, the UI comments indicate the backend returns `0` for timestamp and the UI displays \"Recent\" instead of the selected date, so the stored/displayed date requirement is not evidenced as implemented.",
+      "evidence": [
+        "frontend/src/pages/HealthRecordsPage.tsx",
+        "frontend/src/hooks/useHealthRecords.ts"
+      ]
+    },
+    {
+      "id": "REQ-59",
+      "requirement": "If the baseline snapshot query fails, the UI shows an English fallback message (e.g., “Could not load baseline health data”) without crashing.",
+      "reason": "The baseline hook catches errors and returns an empty array, which prevents React Query from entering `isError`. The card's error fallback is gated on `isError`, so on failure it will likely render nothing (because baseline becomes `[]`), not the required fallback message.",
+      "evidence": [
+        "frontend/src/hooks/useBaselineHealthSnapshot.ts",
+        "frontend/src/components/dashboard/BaselineHealthCard.tsx"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Added web marketing-style branding fields (tagline/description) and updated login UI copy to use them.",
-      "reason": "BuildRequest only asked for a configurable display name and an Install App entry point; tagline/description centralization and new marketing copy are not explicitly requested.",
+      "description": "Expanded lab/vitals support beyond the requested minimum (e.g., hematocrit, WBC, pulse, glucose, HbA1c, cholesterol) and UI label/unit logic for those extra metrics.",
+      "reason": "Requirements only specify supporting hemoglobin, platelets, BP systolic, and BP diastolic at minimum for this feature set; the diff adds additional metric fields/types and UI display logic for several more metrics not requested.",
       "evidence": [
-        "frontend/src/config/appBranding.ts",
-        "frontend/src/pages/LoginPage.tsx"
+        "backend/main.mo",
+        "frontend/src/components/dashboard/BaselineHealthCard.tsx"
       ]
     },
     {
-      "description": "Added/changed footer content including an external 'caffeine.ai' attribution link with UTM parameters.",
-      "reason": "Not requested by any requirement and unrelated to Android sideloading or name configurability.",
-      "evidence": [
-        "frontend/src/components/layout/AppLayout.tsx"
-      ]
-    },
-    {
-      "description": "Expanded authentication gating logic with profile completeness checks and a forced profile setup dialog flow.",
-      "reason": "Not part of packaging/branding/configurability requirements; appears as additional product functionality beyond the requested scope.",
+      "description": "Profile completeness gating via a blocking ProfileSetupDialog in the main AuthGate flow.",
+      "reason": "BuildRequest explicitly states no changes to the Internet Identity authentication flow and that the baseline snapshot query should not require a user profile to be present; the diff shows an AuthGate that blocks app access until a profile is completed.",
       "evidence": [
         "frontend/src/App.tsx"
       ]
@@ -49,19 +59,15 @@
   ],
   "confidence": 0.72,
   "changed_files": [
+    "backend/main.mo",
     "frontend-file-summaries.txt",
-    "frontend/android-wrapper/README.md",
-    "frontend/android-wrapper/app/src/main/AndroidManifest.xml",
-    "frontend/android-wrapper/app/src/main/java/com/nutriscan/wrapper/MainActivity.kt",
-    "frontend/android-wrapper/app/src/main/res/values/strings.xml",
-    "frontend/android-wrapper/app/src/main/res/values/themes.xml",
-    "frontend/index.html",
     "frontend/src/App.tsx",
+    "frontend/src/components/dashboard/BaselineHealthCard.tsx",
     "frontend/src/components/layout/AppHeader.tsx",
-    "frontend/src/components/layout/AppLayout.tsx",
-    "frontend/src/config/appBranding.ts",
-    "frontend/src/pages/InstallAppPage.tsx",
-    "frontend/src/pages/LoginPage.tsx",
+    "frontend/src/hooks/useBaselineHealthSnapshot.ts",
+    "frontend/src/hooks/useHealthRecords.ts",
+    "frontend/src/pages/DashboardPage.tsx",
+    "frontend/src/pages/HealthRecordsPage.tsx",
     "project_state.json"
   ]
 }

@@ -1,92 +1,117 @@
 {
   "kind": "build_request",
-  "title": "Deliver a true installable Android app experience (sideloadable) and improve app-name uniqueness configurability",
+  "title": "Add personal health track records (labs & vitals) to form a baseline health profile",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-41",
-      "text": "Update the Android wrapper documentation to support a non–Play Store distribution flow (sideload), including clear steps to build a release APK/AAB, where to set the production canister URL, and how a user can install the APK on an Android device.",
-      "target": "frontend",
+      "id": "REQ-55",
+      "text": "Add backend support for per-user personal health track records so a signed-in user can store and retrieve lab/vitals measurements (including CBC metrics like hemoglobin and platelets, and blood pressure values) as part of their health profile baseline.",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-1"
         ],
         "quotes": [
-          "Though it may not be on play store, but please make it an app. I want an app."
+          "Also, give option for a personal track record type... CBC test... he should be able to put hemoglobin levels, platelet levels and blood pressure, high BP, low BP, everything... so as the health profile... will be used as a median or as a starting point."
         ]
       },
       "acceptanceCriteria": [
-        "`frontend/android-wrapper/README.md` contains an explicit section for sideload distribution (outside Play Store).",
-        "README includes the exact Gradle property to set for the production web URL (`nutriscan.baseUrl`) and an example value.",
-        "README includes steps to produce a release artifact (APK and/or AAB) using Android Studio and/or Gradle CLI.",
-        "README includes end-user installation steps for the generated APK (sideload), with any required device settings noted."
+        "Backend exposes an API to create a health track record entry for the authenticated caller.",
+        "Backend exposes an API to list the authenticated caller’s health track record entries (most recent first).",
+        "Records are isolated by Internet Identity principal (no user can read/write another user’s records).",
+        "At minimum, the backend data model supports these record types: hemoglobin, platelets, blood pressure systolic (high), blood pressure diastolic (low).",
+        "Each record stores: record type, numeric value, unit (where applicable), and a date/time or day identifier.",
+        "Backend validates that numeric values are non-negative and rejects invalid inputs with a clear error (trap or Result-style error, consistent with existing patterns)."
       ]
     },
     {
-      "id": "REQ-42",
-      "text": "Fix Android wrapper branding consistency so the installed Android app shows the correct, unique user-facing app name and does not contain leftover internal naming (e.g., the current theme name reference). Ensure the Android wrapper builds successfully after the change.",
-      "target": "frontend",
+      "id": "REQ-56",
+      "text": "Add backend support for a “baseline snapshot” derived from the user’s track records that can be used as a starting point (e.g., latest value per metric), and expose it via a dedicated query API.",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-1"
         ],
         "quotes": [
-          "So make it unique and Make it an app."
+          "...health profile will be formed and will be used as a median or as a starting point."
         ]
       },
       "acceptanceCriteria": [
-        "Android wrapper still builds (debug and release) with no resource/theme resolution errors.",
-        "The launcher label shown on Android uses the user-facing app name from `@string/app_name` (currently \"Calorieshivam\") in `frontend/android-wrapper/app/src/main/res/values/strings.xml`.",
-        "Any internal Android theme/style naming that still references an old app name (e.g., `Theme.Calorieman`) is updated to be consistent, and `AndroidManifest.xml` references the updated theme correctly."
+        "Backend exposes a query that returns a baseline snapshot for the caller containing the latest entry per supported metric type (hemoglobin, platelets, BP systolic, BP diastolic).",
+        "If no records exist for a metric, that metric is returned as missing/empty (not trapped).",
+        "The snapshot query does not require the user profile (height/age/goal) to be present and does not trap due to missing profile fields."
       ]
     },
     {
-      "id": "REQ-43",
-      "text": "Add a small in-web “Install App” entry point that explains (in English) how to get the Android app build (sideload) and what it is (a packaged version of the web app). This should reduce confusion for users who expect an app instead of a website.",
+      "id": "REQ-57",
+      "text": "Add a new authenticated UI area for “Health Records” where users can add and view personal track record entries for labs and vitals, using English user-facing text.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-1"
         ],
         "quotes": [
-          "Please make this an app. Website is very much Drainable. People will confuse"
+          "Also, give option for a personal track record type... he should be able to put hemoglobin levels, platelet levels and blood pressure, high BP, low BP, everything..."
         ]
       },
       "acceptanceCriteria": [
-        "The web UI has a visible “Install App” link/button accessible to logged-out users (e.g., on the Login page) and/or logged-in users (e.g., in the header or settings/help area).",
-        "Clicking “Install App” opens a page/section/modal with concise English instructions for Android installation (sideload) and a pointer to where the APK comes from (repository build artifact / provided APK).",
-        "All user-facing text added for this feature is in English."
+        "App includes a reachable Health Records page or section while logged in.",
+        "The UI provides an “Add Record” form that supports: Hemoglobin, Platelets, Blood Pressure (High/Systolic), Blood Pressure (Low/Diastolic).",
+        "The form collects value and date (and unit if not implied) and prevents submission with invalid/empty values, showing an English validation message.",
+        "After saving, the new record appears in the records list without requiring a full page refresh (React Query invalidation/refetch pattern).",
+        "The records list shows type, value + unit, and date, sorted newest-first."
       ]
     },
     {
-      "id": "REQ-44",
-      "text": "Make the user-facing app display name configurable from a single place for both the web app (header/login/tab title/alt text) and the Android wrapper (app_name string), so the owner can choose a more searchable unique name without hunting through multiple files.",
+      "id": "REQ-58",
+      "text": "Add navigation entry points so users can easily find and use Health Records from the existing logged-in experience (without disrupting existing dashboard, logging, scanning, chat, or install flows).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-1"
         ],
         "quotes": [
-          "Though my name is unique Kailash Shivam, but people may not be able to search it. So make it unique"
+          "...the option should be given..."
         ]
       },
       "acceptanceCriteria": [
-        "There is one documented place to change the display name for the web app, and all existing UI locations update accordingly (header brand label, login title, image alt text, browser tab title).",
-        "There is one documented place to change the display name for the Android wrapper (`app_name`) and it is referenced consistently as the launcher label.",
-        "Documentation explicitly states that technical identifiers (e.g., Android package name `com.nutriscan.wrapper`, resource key `nutriscan_base_url`) must remain unchanged unless required for build correctness."
+        "There is a visible navigation entry point to Health Records from the logged-in UI (e.g., header nav and/or dashboard quick action).",
+        "Navigation uses the existing TanStack Router route setup pattern in frontend/src/App.tsx.",
+        "All user-facing labels for the new navigation item and page are in English."
+      ]
+    },
+    {
+      "id": "REQ-59",
+      "text": "Display the caller’s baseline health snapshot (latest hemoglobin/platelets/BP high/BP low when available) in a compact, read-only summary card so the user can see their starting point at a glance.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "...health profile will be formed and will be used as a median or as a starting point."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Dashboard (or another consistently visible logged-in location) shows a compact “Baseline Health” summary when at least one record exists.",
+        "The summary displays the latest available value for each metric type; missing metrics are either omitted or shown as “Not set” (English).",
+        "If the snapshot query fails, the UI degrades gracefully (no app crash) and shows a small English fallback message (e.g., “Could not load baseline health data”)."
       ]
     }
   ],
   "constraints": [
-    "Do not modify files under `frontend/src/components/ui` (read-only UI components); compose them instead.",
-    "Keep all backend logic in the single Motoko actor (`backend/main.mo`); no new backend canisters/services.",
-    "Keep technical identifiers (e.g., Android package name, resource keys like `nutriscan_base_url`) unchanged unless strictly necessary for build correctness.",
-    "Use English for all user-facing text added or updated."
+    "Use English for any user-facing text.",
+    "Backend must remain a single Motoko actor in backend/main.mo (no additional backend services).",
+    "Do not edit files under frontend/src/components/ui (compose existing UI components instead).",
+    "Preserve per-principal data isolation using the existing access control checks/patterns.",
+    "Do not introduce any external APIs or external databases for storing health records."
   ],
   "nonGoals": [
-    "Building an iOS app wrapper.",
-    "Publishing to the Google Play Store (the goal is an installable app experience even without Play Store).",
-    "Adding new backend features unrelated to packaging/branding/configurability."
+    "No medical diagnosis, recommendations, or risk scoring based on lab/vitals values.",
+    "No external lab integrations, file uploads, or PDF parsing for test reports.",
+    "No real-time syncing or notifications for health record updates.",
+    "No changes to Internet Identity authentication flow.",
+    "No changes to existing BMI/TDEE calculation logic beyond adding the new baseline snapshot feature."
   ],
   "imageRequirements": {
     "required": [],
@@ -95,7 +120,9 @@
   "userProfileUpdate": {
     "goalsToAdd": [],
     "goalsToRemove": [],
-    "preferencesToAdd": [],
+    "preferencesToAdd": [
+      "User-facing text should be English."
+    ],
     "preferencesToRemove": [],
     "miscToAdd": [],
     "miscToRemove": [],

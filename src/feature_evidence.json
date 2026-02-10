@@ -2,10 +2,11 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-the-android-wrapper-documentation-to-support-a-non-play-store-distribution-flow-sideload-including-clear-steps-to-build-a-release-apk-aab-where-to-set-the-production-canister-url-and-how-a-user-can-install-the-apk-on-an-android-device",
-      "featureTitle": "Update the Android wrapper documentation to support a non–Play Store distribution flow (sideload), including clear steps to build a release APK/AAB, where to set the production canister URL, and how a user can install the APK on an Android device.",
+      "featureId": "feature-add-a-new-authenticated-ui-area-for-health-records-where-users-can-add-and-view-personal-track-record-entries-for-labs-and-vitals-using-english-user-facing-text",
+      "featureTitle": "Add a new authenticated UI area for “Health Records” where users can add and view personal track record entries for labs and vitals, using English user-facing text.",
       "files": [
-        "frontend/android-wrapper/README.md"
+        "frontend/src/hooks/useHealthRecords.ts",
+        "frontend/src/pages/HealthRecordsPage.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -17,40 +18,17 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-41"
+        "REQ-57"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-fix-android-wrapper-branding-consistency-so-the-installed-android-app-shows-the-correct-unique-user-facing-app-name-and-does-not-contain-leftover-internal-naming-e-g-the-current-theme-name-reference-ensure-the-android-wrapper-builds-successfully-after-the-change",
-      "featureTitle": "Fix Android wrapper branding consistency so the installed Android app shows the correct, unique user-facing app name and does not contain leftover internal naming (e.g., the current theme name reference). Ensure the Android wrapper builds successfully after the change.",
-      "files": [
-        "frontend/android-wrapper/app/src/main/AndroidManifest.xml",
-        "frontend/android-wrapper/app/src/main/java/com/nutriscan/wrapper/MainActivity.kt",
-        "frontend/android-wrapper/app/src/main/res/values/themes.xml"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "camera@1.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-42"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-a-small-in-web-install-app-entry-point-that-explains-in-english-how-to-get-the-android-app-build-sideload-and-what-it-is-a-packaged-version-of-the-web-app-this-should-reduce-confusion-for-users-who-expect-an-app-instead-of-a-website",
-      "featureTitle": "Add a small in-web “Install App” entry point that explains (in English) how to get the Android app build (sideload) and what it is (a packaged version of the web app). This should reduce confusion for users who expect an app instead of a website.",
+      "featureId": "feature-add-navigation-entry-points-so-users-can-easily-find-and-use-health-records-from-the-existing-logged-in-experience-without-disrupting-existing-dashboard-logging-scanning-chat-or-install-flows",
+      "featureTitle": "Add navigation entry points so users can easily find and use Health Records from the existing logged-in experience (without disrupting existing dashboard, logging, scanning, chat, or install flows).",
       "files": [
         "frontend/src/App.tsx",
         "frontend/src/components/layout/AppHeader.tsx",
-        "frontend/src/pages/InstallAppPage.tsx",
-        "frontend/src/pages/LoginPage.tsx"
+        "frontend/src/pages/DashboardPage.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -62,21 +40,17 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-43"
+        "REQ-58"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-make-the-user-facing-app-display-name-configurable-from-a-single-place-for-both-the-web-app-header-login-tab-title-alt-text-and-the-android-wrapper-app-name-string-so-the-owner-can-choose-a-more-searchable-unique-name-without-hunting-through-multiple-files",
-      "featureTitle": "Make the user-facing app display name configurable from a single place for both the web app (header/login/tab title/alt text) and the Android wrapper (app_name string), so the owner can choose a more searchable unique name without hunting through multiple files.",
+      "featureId": "feature-display-the-caller-s-baseline-health-snapshot-latest-hemoglobin-platelets-bp-high-bp-low-when-available-in-a-compact-read-only-summary-card-so-the-user-can-see-their-starting-point-at-a-glance",
+      "featureTitle": "Display the caller’s baseline health snapshot (latest hemoglobin/platelets/BP high/BP low when available) in a compact, read-only summary card so the user can see their starting point at a glance.",
       "files": [
-        "frontend/android-wrapper/README.md",
-        "frontend/android-wrapper/app/src/main/res/values/strings.xml",
-        "frontend/index.html",
-        "frontend/src/components/layout/AppHeader.tsx",
-        "frontend/src/components/layout/AppLayout.tsx",
-        "frontend/src/config/appBranding.ts",
-        "frontend/src/pages/LoginPage.tsx"
+        "frontend/src/components/dashboard/BaselineHealthCard.tsx",
+        "frontend/src/hooks/useBaselineHealthSnapshot.ts",
+        "frontend/src/pages/DashboardPage.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -88,7 +62,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-44"
+        "REQ-59"
       ],
       "confidence": "high"
     }

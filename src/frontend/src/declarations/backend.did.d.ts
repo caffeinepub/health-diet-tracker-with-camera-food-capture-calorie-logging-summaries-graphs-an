@@ -15,6 +15,13 @@ export type ActivityLevel = { 'lightlyActive' : null } |
   { 'veryActive' : null } |
   { 'moderatelyActive' : null } |
   { 'sedentary' : null };
+export interface BaselineSnapshot {
+  'metric' : string,
+  'value' : string,
+  'timestamp' : bigint,
+  'measurementType' : { 'blood' : null } |
+    { 'vitals' : null },
+}
 export interface BodyGoalDetails {
   'goalType' : GoalType,
   'weeklyGoalSpeed' : number,
@@ -48,6 +55,32 @@ export interface HealthMetrics {
   'bmr' : number,
   'bmiCategory' : string,
   'tdee' : number,
+}
+export interface HealthTrackRecord {
+  'hematocrit' : [] | [number],
+  'day' : bigint,
+  'glucoseFasting' : [] | [number],
+  'hba1c' : [] | [number],
+  'cholesterolTot' : [] | [number],
+  'hemoglobin' : [] | [number],
+  'systolicBP' : [] | [bigint],
+  'diastolicBP' : [] | [bigint],
+  'timestamp' : bigint,
+  'pulse' : [] | [bigint],
+  'whiteBloodCells' : [] | [number],
+  'platelets' : [] | [number],
+}
+export interface LabVitalsMetrics {
+  'hematocrit' : [] | [number],
+  'glucoseFasting' : [] | [number],
+  'hba1c' : [] | [number],
+  'cholesterolTot' : [] | [number],
+  'hemoglobin' : [] | [number],
+  'systolicBP' : [] | [bigint],
+  'diastolicBP' : [] | [bigint],
+  'pulse' : [] | [bigint],
+  'whiteBloodCells' : [] | [number],
+  'platelets' : [] | [number],
 }
 export interface QuestionSuggestion {
   'relatedQuestions' : Array<string>,
@@ -92,11 +125,14 @@ export interface _SERVICE {
     ],
     bigint
   >,
+  'addLabVitalsSnapshot' : ActorMethod<[LabVitalsMetrics], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'getCallerHealthMetrics' : ActorMethod<[], HealthMetrics>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getFoodEntriesForCaller' : ActorMethod<[bigint, bigint], Array<FoodEntry>>,
+  'getFullLabVitalsHistory' : ActorMethod<[], Array<HealthTrackRecord>>,
+  'getLabVitalsBaseline' : ActorMethod<[], Array<BaselineSnapshot>>,
   'getPortionAdjusterGuidance' : ActorMethod<[], string>,
   'getSuggestedQuestions' : ActorMethod<[], Array<QuestionSuggestion>>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,

@@ -1,7 +1,7 @@
 import { useNavigate } from '@tanstack/react-router';
 import { useGetCallerUserProfile } from '../../hooks/useCurrentUserProfile';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, Plus, Camera, MessageCircle, Smartphone } from 'lucide-react';
+import { LayoutDashboard, Plus, Camera, MessageCircle, Smartphone, Activity } from 'lucide-react';
 import LoginButton from '../auth/LoginButton';
 import { APP_DISPLAY_NAME } from '../../config/appBranding';
 
@@ -60,6 +60,14 @@ export default function AppHeader() {
               >
                 <MessageCircle className="w-4 h-4" />
                 Helper
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => navigate({ to: '/health-records' })}
+                className="gap-2"
+              >
+                <Activity className="w-4 h-4" />
+                Health Records
               </Button>
               <Button
                 variant="ghost"

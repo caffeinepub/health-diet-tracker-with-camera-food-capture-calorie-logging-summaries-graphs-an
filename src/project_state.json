@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 19,
-  "summary": "Calorieshivam health and diet tracking app with camera-based food scanning, daily calorie logging, summaries/graphs/ratings, in-app helper chat, local rules-based nutrition estimation with optional weight input, a one-time body-goal onboarding, plus BMI + maintenance-calorie (TDEE) calculations from user profile data (height/weight/age/etc.) with a persistent dashboard area showing whether daily intake is above/below/at maintenance; uses an aesthetic “S” logo across the app, and includes an Android (Play Store) build packaged from the existing web app via a WebView wrapper.",
+  "projectStateVersion": 29,
+  "summary": "Calorieshivam health and diet tracking app with camera-based food scanning, daily calorie logging, summaries/graphs/ratings, in-app helper chat, local rules-based nutrition estimation with optional weight input, a one-time body-goal onboarding, plus BMI + maintenance-calorie (TDEE) calculations from user profile data (height/weight/age/etc.) with a persistent dashboard area showing whether daily intake is above/below/at maintenance; additionally supports an optional personal health track-record/profile baseline where users can log lab/vitals values (e.g., CBC metrics like hemoglobin/platelets and blood pressure) to form a starting health profile; uses an aesthetic “S” logo across the app, and includes an Android (Play Store) build packaged from the existing web app via a WebView wrapper.",
   "architectural_notes": [
     "Requires device camera integration (back camera) for food scanning.",
     "AI/ML component needed for food recognition and nutrition estimation.",
@@ -338,6 +338,94 @@
         "REQ-44"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-ensure-the-existing-android-webview-wrapper-can-produce-an-installable-release-apk-sideload-via-a-single-documented-gradle-command-without-requiring-any-code-changes-to-switch-the-target-web-app-url",
+      "title": "Ensure the existing Android WebView wrapper can produce an installable release APK (sideload) via a single documented Gradle command, without requiring any code changes to switch the target web app URL.",
+      "reqIds": [
+        "REQ-45"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-clear-complete-english-sideload-build-section-to-frontend-android-wrapper-readme-md-that-explains-how-to-set-the-production-canister-url-generate-a-release-apk-and-where-to-find-the-resulting-apk-file",
+      "title": "Add a clear, complete, English sideload build section to `frontend/android-wrapper/README.md` that explains how to set the production canister URL, generate a release APK, and where to find the resulting APK file.",
+      "reqIds": [
+        "REQ-46"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-make-release-signing-optional-but-supported-for-producing-a-truly-install-ready-apk-allow-configuring-a-release-signing-config-via-gradle-properties-recommended-via-local-properties-or-environment-variables-and-document-it-in-the-android-wrapper-readme",
+      "title": "Make release signing optional-but-supported for producing a truly install-ready APK: allow configuring a release signing config via Gradle properties (recommended via `local.properties` or environment variables) and document it in the Android wrapper README.",
+      "reqIds": [
+        "REQ-47"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-reproducible-packaging-flow-that-builds-the-android-wrapper-release-apk-and-copies-exports-it-to-a-stable-web-downloadable-location-inside-the-web-frontend-e-g-a-committed-path-under-frontend-public-such-as-frontend-public-downloads-calorieshivam-apk-or-an-equivalent-single-documented-output-path-without-requiring-code-changes-to-switch-environments-the-wrapped-web-url-must-continue-to-come-from-frontend-android-wrapper-gradle-properties-via-nutriscan-baseurl",
+      "title": "Add a reproducible packaging flow that builds the Android wrapper release APK and copies/exports it to a stable, web-downloadable location inside the web frontend (e.g., a committed path under `frontend/public/` such as `frontend/public/downloads/Calorieshivam.apk`, or an equivalent single, documented output path), without requiring code changes to switch environments (the wrapped web URL must continue to come from `frontend/android-wrapper/gradle.properties` via `nutriscan.baseUrl`).",
+      "reqIds": [
+        "REQ-48"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-in-web-install-app-page-to-provide-a-direct-apk-download-link-button-when-the-packaged-apk-is-present-in-the-frontend-s-static-assets-and-update-step-1-copy-to-reference-downloading-the-apk-directly-from-the-website-english-user-facing-text-only",
+      "title": "Update the in-web Install App page to provide a direct APK download link/button when the packaged APK is present in the frontend’s static assets, and update Step 1 copy to reference downloading the APK directly from the website (English user-facing text only).",
+      "reqIds": [
+        "REQ-49"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-android-wrapper-release-apk-is-produced-and-placed-at-frontend-public-downloads-calorieshivam-apk-so-it-is-served-as-a-static-asset-by-the-deployed-web-app",
+      "title": "Ensure the Android wrapper release APK is produced and placed at `frontend/public/downloads/Calorieshivam.apk` so it is served as a static asset by the deployed web app.",
+      "reqIds": [
+        "REQ-51"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-make-the-in-web-install-app-page-show-the-apk-as-available-and-allow-downloading-it-when-downloads-calorieshivam-apk-exists-in-static-assets",
+      "title": "Make the in-web Install App page show the APK as available and allow downloading it when `/downloads/Calorieshivam.apk` exists in static assets.",
+      "reqIds": [
+        "REQ-52"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-provide-a-complete-copy-pasteable-sideload-build-workflow-that-produces-a-release-apk-for-the-android-webview-wrapper-and-exports-it-to-the-stable-static-asset-location-frontend-public-downloads-calorieshivam-apk",
+      "title": "Provide a complete, copy-pasteable sideload build workflow that produces a release APK for the Android WebView wrapper and exports it to the stable static-asset location `frontend/public/downloads/Calorieshivam.apk`.",
+      "reqIds": [
+        "REQ-53"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-new-authenticated-ui-area-for-health-records-where-users-can-add-and-view-personal-track-record-entries-for-labs-and-vitals-using-english-user-facing-text",
+      "title": "Add a new authenticated UI area for “Health Records” where users can add and view personal track record entries for labs and vitals, using English user-facing text.",
+      "reqIds": [
+        "REQ-57"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-navigation-entry-points-so-users-can-easily-find-and-use-health-records-from-the-existing-logged-in-experience-without-disrupting-existing-dashboard-logging-scanning-chat-or-install-flows",
+      "title": "Add navigation entry points so users can easily find and use Health Records from the existing logged-in experience (without disrupting existing dashboard, logging, scanning, chat, or install flows).",
+      "reqIds": [
+        "REQ-58"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-display-the-caller-s-baseline-health-snapshot-latest-hemoglobin-platelets-bp-high-bp-low-when-available-in-a-compact-read-only-summary-card-so-the-user-can-see-their-starting-point-at-a-glance",
+      "title": "Display the caller’s baseline health snapshot (latest hemoglobin/platelets/BP high/BP low when available) in a compact, read-only summary card so the user can see their starting point at a glance.",
+      "reqIds": [
+        "REQ-59"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -485,6 +573,50 @@
       "id": "AR-24",
       "summary": "Provide a standalone installable mobile app experience (at minimum an Android APK that can be installed outside the Play Store / sideload), and ensure the app identity/name is unique and discoverable vs the website",
       "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-27",
+      "summary": "Extend `frontend/android-wrapper/README.md` with a complete, copy-pasteable section explaining how to (1) set `nutriscan.baseUrl`, (2) run the single packaging command/script, and (3) locate the resulting APK file that is meant to be shared for direct download (English documentation only).",
+      "reqIds": [
+        "REQ-50"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-28",
+      "summary": "Make the Android APK available for direct download (host in a stable web-accessible location and expose a clear download link/button in the web UI).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-30",
+      "summary": "Complete `frontend/android-wrapper/README.md` so the “Sideload Distribution (Outside Play Store)” section is fully written in English and includes: (1) exactly where/how to set `nutriscan.baseUrl` in `frontend/android-wrapper/gradle.properties`, (2) a single command to run the packaging script, and (3) where to find the resulting APK file.",
+      "reqIds": [
+        "REQ-54"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-31",
+      "summary": "Add a personal health track record feature so users can enter and store baseline lab/vitals values (e.g., CBC results like hemoglobin and platelet levels, and blood pressure high/low) to form a starting health profile for future reference.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-32",
+      "summary": "Add backend support for per-user personal health track records so a signed-in user can store and retrieve lab/vitals measurements (including CBC metrics like hemoglobin and platelets, and blood pressure values) as part of their health profile baseline.",
+      "reqIds": [
+        "REQ-55"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-33",
+      "summary": "Add backend support for a “baseline snapshot” derived from the user’s track records that can be used as a starting point (e.g., latest value per metric), and expose it via a dedicated query API.",
+      "reqIds": [
+        "REQ-56"
+      ],
       "status": "pending"
     }
   ],

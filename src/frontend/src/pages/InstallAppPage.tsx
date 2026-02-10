@@ -1,11 +1,40 @@
 import { useNavigate } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Smartphone, Download, Settings, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Smartphone, Download, Settings, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { APP_DISPLAY_NAME } from '../config/appBranding';
+import { useState, useEffect } from 'react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function InstallAppPage() {
   const navigate = useNavigate();
+  const [apkAvailable, setApkAvailable] = useState<boolean | null>(null);
+  const [isCheckingApk, setIsCheckingApk] = useState(true);
+
+  const APK_PATH = '/downloads/Calorieshivam.apk';
+
+  useEffect(() => {
+    // Check if APK is available with no-store caching to get fresh status
+    const checkApkAvailability = async () => {
+      try {
+        const response = await fetch(APK_PATH, { 
+          method: 'HEAD',
+          cache: 'no-store'
+        });
+        setApkAvailable(response.ok);
+      } catch (error) {
+        setApkAvailable(false);
+      } finally {
+        setIsCheckingApk(false);
+      }
+    };
+
+    checkApkAvailability();
+  }, []);
+
+  const handleDownloadApk = () => {
+    window.location.href = APK_PATH;
+  };
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
@@ -22,6 +51,53 @@ export default function InstallAppPage() {
           <p className="text-muted-foreground">Get the Android app for a native experience</p>
         </div>
       </div>
+
+      {/* Download APK Card */}
+      <Card className="border-primary/50 bg-primary/5">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Download className="w-5 h-5" />
+            Download APK
+          </CardTitle>
+          <CardDescription>
+            {isCheckingApk
+              ? 'Checking APK availability...'
+              : apkAvailable
+              ? 'Download the Android app directly from this website'
+              : 'APK file is not currently available for direct download'}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {isCheckingApk ? (
+            <div className="flex items-center gap-3 text-muted-foreground">
+              <Loader2 className="w-5 h-5 animate-spin" />
+              <span>Checking availability...</span>
+            </div>
+          ) : apkAvailable ? (
+            <>
+              <p className="text-sm text-muted-foreground">
+                Click the button below to download the {APP_DISPLAY_NAME} APK file directly to your device.
+                After downloading, follow the installation steps below.
+              </p>
+              <Button
+                onClick={handleDownloadApk}
+                size="lg"
+                className="w-full sm:w-auto"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Download Calorieshivam.apk
+              </Button>
+            </>
+          ) : (
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                The APK file is not currently available for direct download. The app administrator needs to build and package the Android APK using the packaging script. Once available, you'll be able to download it directly from this page.
+              </AlertDescription>
+            </Alert>
+          )}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
@@ -75,9 +151,11 @@ export default function InstallAppPage() {
                 1
               </div>
               <div className="flex-1">
-                <h4 className="font-semibold mb-1">Get the APK File</h4>
+                <h4 className="font-semibold mb-1">Download the APK File</h4>
                 <p className="text-sm text-muted-foreground">
-                  The APK file is provided by the app owner or can be built from the repository. Contact the app administrator to obtain the latest APK file.
+                  {apkAvailable
+                    ? 'Use the download button above to get the APK file directly from this website.'
+                    : 'The APK file will be available for download once the app administrator builds and packages it.'}
                 </p>
               </div>
             </div>

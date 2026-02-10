@@ -27,5 +27,5 @@ This section explains how to build and distribute the app as an APK for installa
 
 Before building, you **must** configure the production web app URL.
 
-**Edit `gradle.properties`:**
+**Edit `frontend/android-wrapper/gradle.properties`:**
 

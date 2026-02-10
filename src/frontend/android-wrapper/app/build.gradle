@@ -17,8 +17,29 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         
         // Configure base URL from Gradle properties
+        // This is injected at build time for all build types
         def baseUrl = project.findProperty('nutriscan.baseUrl') ?: 'https://YOUR_CANISTER_ID.ic0.app'
         resValue "string", "nutriscan_base_url", baseUrl
+    }
+
+    // Optional signing configuration
+    // Reads from local.properties or environment variables
+    // If not provided, release builds will be unsigned
+    signingConfigs {
+        release {
+            def keystorePath = project.findProperty('RELEASE_STORE_FILE') ?: System.getenv('RELEASE_STORE_FILE')
+            def keystorePassword = project.findProperty('RELEASE_STORE_PASSWORD') ?: System.getenv('RELEASE_STORE_PASSWORD')
+            def keyAliasValue = project.findProperty('RELEASE_KEY_ALIAS') ?: System.getenv('RELEASE_KEY_ALIAS')
+            def keyPasswordValue = project.findProperty('RELEASE_KEY_PASSWORD') ?: System.getenv('RELEASE_KEY_PASSWORD')
+            
+            // Only configure signing if all required values are present
+            if (keystorePath && keystorePassword && keyAliasValue && keyPasswordValue) {
+                storeFile file(keystorePath)
+                storePassword keystorePassword
+                keyAlias keyAliasValue
+                keyPassword keyPasswordValue
+            }
+        }
     }
 
     buildTypes {
@@ -27,24 +48,21 @@ android {
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             
-            // Signing config - configure this for Play Store release
-            // signingConfig signingConfigs.release
+            // Apply signing config only if it was successfully configured
+            def keystorePath = project.findProperty('RELEASE_STORE_FILE') ?: System.getenv('RELEASE_STORE_FILE')
+            def keystorePassword = project.findProperty('RELEASE_STORE_PASSWORD') ?: System.getenv('RELEASE_STORE_PASSWORD')
+            def keyAliasValue = project.findProperty('RELEASE_KEY_ALIAS') ?: System.getenv('RELEASE_KEY_ALIAS')
+            def keyPasswordValue = project.findProperty('RELEASE_KEY_PASSWORD') ?: System.getenv('RELEASE_KEY_PASSWORD')
+            
+            if (keystorePath && keystorePassword && keyAliasValue && keyPasswordValue) {
+                signingConfig signingConfigs.release
+            }
         }
         debug {
             applicationIdSuffix ".debug"
             debuggable true
         }
     }
-    
-    // Uncomment and configure for release builds
-    // signingConfigs {
-    //     release {
-    //         storeFile file(project.findProperty('RELEASE_STORE_FILE') ?: 'release.keystore')
-    //         storePassword project.findProperty('RELEASE_STORE_PASSWORD') ?: ''
-    //         keyAlias project.findProperty('RELEASE_KEY_ALIAS') ?: ''
-    //         keyPassword project.findProperty('RELEASE_KEY_PASSWORD') ?: ''
-    //     }
-    // }
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8

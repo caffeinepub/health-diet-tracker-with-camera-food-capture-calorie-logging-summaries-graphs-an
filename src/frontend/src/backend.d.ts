@@ -7,31 +7,25 @@ export interface None {
     __kind__: "None";
 }
 export type Option<T> = Some<T> | None;
+export interface HealthTrackRecord {
+    hematocrit?: number;
+    day: bigint;
+    glucoseFasting?: number;
+    hba1c?: number;
+    cholesterolTot?: number;
+    hemoglobin?: number;
+    systolicBP?: bigint;
+    diastolicBP?: bigint;
+    timestamp: bigint;
+    pulse?: bigint;
+    whiteBloodCells?: number;
+    platelets?: number;
+}
 export interface QuestionSuggestion {
     relatedQuestions: Array<string>;
     question: string;
     answer: string;
     citations: Array<string>;
-}
-export interface FoodEntry {
-    id: bigint;
-    day: bigint;
-    owner: Principal;
-    calories: number;
-    description: string;
-    confidenceLevel: number;
-    portionSize: number;
-    micronutrients: {
-        fiber: number;
-        sodium: number;
-        sugar: number;
-    };
-    macros: {
-        fat: number;
-        carbs: number;
-        protein: number;
-    };
-    foodLabel: string;
 }
 export interface HealthMetrics {
     bmi: number;
@@ -53,6 +47,44 @@ export interface WeeklyFeedback {
     entriesChecked: bigint;
     totalProtein: number;
     entriesPerDay: number;
+}
+export interface BaselineSnapshot {
+    metric: string;
+    value: string;
+    timestamp: bigint;
+    measurementType: Variant_blood_vitals;
+}
+export interface LabVitalsMetrics {
+    hematocrit?: number;
+    glucoseFasting?: number;
+    hba1c?: number;
+    cholesterolTot?: number;
+    hemoglobin?: number;
+    systolicBP?: bigint;
+    diastolicBP?: bigint;
+    pulse?: bigint;
+    whiteBloodCells?: number;
+    platelets?: number;
+}
+export interface FoodEntry {
+    id: bigint;
+    day: bigint;
+    owner: Principal;
+    calories: number;
+    description: string;
+    confidenceLevel: number;
+    portionSize: number;
+    micronutrients: {
+        fiber: number;
+        sodium: number;
+        sugar: number;
+    };
+    macros: {
+        fat: number;
+        carbs: number;
+        protein: number;
+    };
+    foodLabel: string;
 }
 export interface UserProfile {
     age?: bigint;
@@ -92,6 +124,10 @@ export enum UserRole {
     user = "user",
     guest = "guest"
 }
+export enum Variant_blood_vitals {
+    blood = "blood",
+    vitals = "vitals"
+}
 export interface backendInterface {
     addFoodEntry(day: bigint, foodLabel: string, description: string, calories: number, macros: {
         fat: number;
@@ -102,11 +138,14 @@ export interface backendInterface {
         sodium: number;
         sugar: number;
     }, portionSize: number, confidenceLevel: number): Promise<bigint>;
+    addLabVitalsSnapshot(snapshot: LabVitalsMetrics): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     getCallerHealthMetrics(): Promise<HealthMetrics>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getFoodEntriesForCaller(startDay: bigint, endDay: bigint): Promise<Array<FoodEntry>>;
+    getFullLabVitalsHistory(): Promise<Array<HealthTrackRecord>>;
+    getLabVitalsBaseline(): Promise<Array<BaselineSnapshot>>;
     getPortionAdjusterGuidance(): Promise<string>;
     getSuggestedQuestions(): Promise<Array<QuestionSuggestion>>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
