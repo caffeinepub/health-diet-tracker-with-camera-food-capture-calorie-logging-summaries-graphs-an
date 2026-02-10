@@ -13,6 +13,20 @@ export const UserRole = IDL.Variant({
   'user' : IDL.Null,
   'guest' : IDL.Null,
 });
+export const HealthMetrics = IDL.Record({
+  'bmi' : IDL.Float64,
+  'bmr' : IDL.Float64,
+  'bmiCategory' : IDL.Text,
+  'tdee' : IDL.Float64,
+});
+export const Sex = IDL.Variant({ 'female' : IDL.Null, 'male' : IDL.Null });
+export const ActivityLevel = IDL.Variant({
+  'lightlyActive' : IDL.Null,
+  'extraActive' : IDL.Null,
+  'veryActive' : IDL.Null,
+  'moderatelyActive' : IDL.Null,
+  'sedentary' : IDL.Null,
+});
 export const GoalType = IDL.Variant({
   'gainMuscle' : IDL.Null,
   'maintain' : IDL.Null,
@@ -26,6 +40,10 @@ export const BodyGoalDetails = IDL.Record({
   'currentWeight' : IDL.Float64,
 });
 export const UserProfile = IDL.Record({
+  'age' : IDL.Opt(IDL.Nat),
+  'sex' : IDL.Opt(Sex),
+  'activityLevel' : IDL.Opt(ActivityLevel),
+  'heightCm' : IDL.Opt(IDL.Float64),
   'name' : IDL.Text,
   'bodyGoal' : IDL.Opt(BodyGoalDetails),
 });
@@ -98,6 +116,7 @@ export const idlService = IDL.Service({
       [],
     ),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+  'getCallerHealthMetrics' : IDL.Func([], [HealthMetrics], ['query']),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
   'getFoodEntriesForCaller' : IDL.Func(
@@ -130,6 +149,20 @@ export const idlFactory = ({ IDL }) => {
     'user' : IDL.Null,
     'guest' : IDL.Null,
   });
+  const HealthMetrics = IDL.Record({
+    'bmi' : IDL.Float64,
+    'bmr' : IDL.Float64,
+    'bmiCategory' : IDL.Text,
+    'tdee' : IDL.Float64,
+  });
+  const Sex = IDL.Variant({ 'female' : IDL.Null, 'male' : IDL.Null });
+  const ActivityLevel = IDL.Variant({
+    'lightlyActive' : IDL.Null,
+    'extraActive' : IDL.Null,
+    'veryActive' : IDL.Null,
+    'moderatelyActive' : IDL.Null,
+    'sedentary' : IDL.Null,
+  });
   const GoalType = IDL.Variant({
     'gainMuscle' : IDL.Null,
     'maintain' : IDL.Null,
@@ -143,6 +176,10 @@ export const idlFactory = ({ IDL }) => {
     'currentWeight' : IDL.Float64,
   });
   const UserProfile = IDL.Record({
+    'age' : IDL.Opt(IDL.Nat),
+    'sex' : IDL.Opt(Sex),
+    'activityLevel' : IDL.Opt(ActivityLevel),
+    'heightCm' : IDL.Opt(IDL.Float64),
     'name' : IDL.Text,
     'bodyGoal' : IDL.Opt(BodyGoalDetails),
   });
@@ -215,6 +252,7 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+    'getCallerHealthMetrics' : IDL.Func([], [HealthMetrics], ['query']),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
     'getFoodEntriesForCaller' : IDL.Func(

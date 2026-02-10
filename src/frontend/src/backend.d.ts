@@ -33,6 +33,12 @@ export interface FoodEntry {
     };
     foodLabel: string;
 }
+export interface HealthMetrics {
+    bmi: number;
+    bmr: number;
+    bmiCategory: string;
+    tdee: number;
+}
 export interface BodyGoalDetails {
     goalType: GoalType;
     weeklyGoalSpeed: number;
@@ -49,8 +55,19 @@ export interface WeeklyFeedback {
     entriesPerDay: number;
 }
 export interface UserProfile {
+    age?: bigint;
+    sex?: Sex;
+    activityLevel?: ActivityLevel;
+    heightCm?: number;
     name: string;
     bodyGoal?: BodyGoalDetails;
+}
+export enum ActivityLevel {
+    lightlyActive = "lightlyActive",
+    extraActive = "extraActive",
+    veryActive = "veryActive",
+    moderatelyActive = "moderatelyActive",
+    sedentary = "sedentary"
 }
 export enum FeedbackType {
     offBalance = "offBalance",
@@ -65,6 +82,10 @@ export enum GoalType {
     maintain = "maintain",
     gainWeight = "gainWeight",
     loseWeight = "loseWeight"
+}
+export enum Sex {
+    female = "female",
+    male = "male"
 }
 export enum UserRole {
     admin = "admin",
@@ -82,6 +103,7 @@ export interface backendInterface {
         sugar: number;
     }, portionSize: number, confidenceLevel: number): Promise<bigint>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
+    getCallerHealthMetrics(): Promise<HealthMetrics>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getFoodEntriesForCaller(startDay: bigint, endDay: bigint): Promise<Array<FoodEntry>>;

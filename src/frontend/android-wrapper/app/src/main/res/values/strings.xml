@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Calorieshivam</string>
+    
+    <!-- Base URL for the Calorieshivam web app - configured via Gradle -->
+    <string name="nutriscan_base_url">NUTRISCAN_BASE_URL_PLACEHOLDER</string>
+</resources>

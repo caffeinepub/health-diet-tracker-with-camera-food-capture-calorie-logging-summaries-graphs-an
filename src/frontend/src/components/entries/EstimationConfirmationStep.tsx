@@ -198,9 +198,10 @@ export default function EstimationConfirmationStep({
                   {isSupported && (
                     <Button
                       type="button"
-                      variant={isListening ? 'destructive' : 'outline'}
-                      size="sm"
+                      variant={isListening ? 'destructive' : 'default'}
+                      size="default"
                       onClick={handleToggleDictation}
+                      className={isListening ? '' : 'bg-blue-600 hover:bg-blue-700 text-white'}
                     >
                       {isListening ? (
                         <>

@@ -10,6 +10,11 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
+export type ActivityLevel = { 'lightlyActive' : null } |
+  { 'extraActive' : null } |
+  { 'veryActive' : null } |
+  { 'moderatelyActive' : null } |
+  { 'sedentary' : null };
 export interface BodyGoalDetails {
   'goalType' : GoalType,
   'weeklyGoalSpeed' : number,
@@ -38,13 +43,25 @@ export type GoalType = { 'gainMuscle' : null } |
   { 'maintain' : null } |
   { 'gainWeight' : null } |
   { 'loseWeight' : null };
+export interface HealthMetrics {
+  'bmi' : number,
+  'bmr' : number,
+  'bmiCategory' : string,
+  'tdee' : number,
+}
 export interface QuestionSuggestion {
   'relatedQuestions' : Array<string>,
   'question' : string,
   'answer' : string,
   'citations' : Array<string>,
 }
+export type Sex = { 'female' : null } |
+  { 'male' : null };
 export interface UserProfile {
+  'age' : [] | [bigint],
+  'sex' : [] | [Sex],
+  'activityLevel' : [] | [ActivityLevel],
+  'heightCm' : [] | [number],
   'name' : string,
   'bodyGoal' : [] | [BodyGoalDetails],
 }
@@ -76,6 +93,7 @@ export interface _SERVICE {
     bigint
   >,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
+  'getCallerHealthMetrics' : ActorMethod<[], HealthMetrics>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getFoodEntriesForCaller' : ActorMethod<[bigint, bigint], Array<FoodEntry>>,

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 9,
-  "summary": "NutriScan health and diet tracking app with camera-based food scanning, daily calorie logging, summaries/graphs/ratings, in-app helper chat, local rules-based nutrition estimation with optional weight input, and a one-time body-goal onboarding (goal + current/target weight + weekly speed), using an aesthetic “S” logo across the app.",
+  "projectStateVersion": 17,
+  "summary": "Calorieshivam health and diet tracking app with camera-based food scanning, daily calorie logging, summaries/graphs/ratings, in-app helper chat, local rules-based nutrition estimation with optional weight input, a one-time body-goal onboarding, plus BMI + maintenance-calorie (TDEE) calculations from user profile data (height/weight/age/etc.) with a persistent dashboard area showing whether daily intake is above/below/at maintenance; uses an aesthetic “S” logo across the app, and includes an Android (Play Store) build packaged from the existing web app via a WebView wrapper.",
   "architectural_notes": [
     "Requires device camera integration (back camera) for food scanning.",
     "AI/ML component needed for food recognition and nutrition estimation.",
@@ -194,6 +194,118 @@
         "REQ-24"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-in-the-scan-confirmation-estimationconfirmationstep-ui-make-the-voice-dictation-button-speak-stop-more-prominent-by-styling-it-with-a-blue-appearance-and-a-medium-size-while-keeping-its-existing-behavior-start-stop-dictation-and-conditional-rendering-only-when-speech-to-text-is-supported",
+      "title": "In the scan confirmation (EstimationConfirmationStep) UI, make the voice dictation button (\"Speak\" / \"Stop\") more prominent by styling it with a blue appearance and a medium size while keeping its existing behavior (start/stop dictation) and conditional rendering (only when speech-to-text is supported).",
+      "reqIds": [
+        "REQ-25"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-an-android-webview-wrapper-project-to-the-repository-that-packages-the-existing-nutriscan-web-app-into-a-buildable-android-apk-suitable-for-google-play-store-submission",
+      "title": "Add an Android WebView wrapper project to the repository that packages the existing NutriScan web app into a buildable Android APK suitable for Google Play Store submission.",
+      "reqIds": [
+        "REQ-26"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-make-the-webview-wrapper-configurable-for-the-target-nutriscan-web-url-e-g-production-canister-url-without-requiring-code-changes-for-switching-environments",
+      "title": "Make the WebView wrapper configurable for the target NutriScan web URL (e.g., production canister URL), without requiring code changes for switching environments.",
+      "reqIds": [
+        "REQ-27"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-internet-identity-login-works-reliably-inside-the-android-wrapper-by-handling-external-window-redirect-flows-appropriately-e-g-opening-authentication-in-the-system-browser-or-chrome-custom-tabs-and-returning-to-the-app",
+      "title": "Ensure Internet Identity login works reliably inside the Android wrapper by handling external-window/redirect flows appropriately (e.g., opening authentication in the system browser or Chrome Custom Tabs and returning to the app).",
+      "reqIds": [
+        "REQ-28"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-camera-based-scanning-and-photo-capture-work-inside-the-android-wrapper-by-requesting-the-correct-android-permissions-and-allowing-camera-access-from-webview-including-https-requirement-and-permission-prompts",
+      "title": "Ensure camera-based scanning and photo capture work inside the Android wrapper by requesting the correct Android permissions and allowing camera access from WebView (including HTTPS requirement and permission prompts).",
+      "reqIds": [
+        "REQ-29"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-play-store-oriented-documentation-to-the-repository-describing-how-to-build-a-release-apk-aab-configure-signing-set-the-appid-package-name-and-where-to-set-the-production-url",
+      "title": "Add Play Store–oriented documentation to the repository describing how to build a release APK/AAB, configure signing, set the appId/package name, and where to set the production URL.",
+      "reqIds": [
+        "REQ-30"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-react-web-app-s-user-facing-branding-text-from-nutriscan-to-calorieman-wherever-it-appears-in-the-ui-including-the-header-brand-label-and-the-login-page-title",
+      "title": "Update the React web app’s user-facing branding text from \"NutriScan\" to \"Calorieman\" wherever it appears in the UI, including the header brand label and the login page title.",
+      "reqIds": [
+        "REQ-31"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-browser-tab-title-to-use-the-app-name-calorieman-and-keep-the-rest-of-the-title-text-in-english",
+      "title": "Update the browser tab title to use the app name \"Calorieman\" (and keep the rest of the title text in English).",
+      "reqIds": [
+        "REQ-32"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-android-webview-wrapper-s-user-facing-app-name-from-nutriscan-to-calorieman-in-android-string-resources-and-any-visible-documentation-headings-referencing-the-old-app-name",
+      "title": "Update the Android WebView wrapper’s user-facing app name from \"NutriScan\" to \"Calorieman\" in Android string resources and any visible documentation headings referencing the old app name.",
+      "reqIds": [
+        "REQ-33"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-internal-android-wrapper-theme-naming-to-match-the-new-app-name-ensuring-the-app-continues-to-build-and-run-with-no-visual-regressions-from-the-current-theme",
+      "title": "Update internal Android wrapper theme naming to match the new app name, ensuring the app continues to build and run with no visual regressions from the current theme.",
+      "reqIds": [
+        "REQ-34"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-perform-a-repo-wide-pass-over-user-facing-strings-to-ensure-remaining-references-to-nutriscan-that-represent-the-app-name-are-updated-to-calorieman-without-changing-technical-identifiers-like-package-names-unless-explicitly-required",
+      "title": "Perform a repo-wide pass over user-facing strings to ensure remaining references to \"NutriScan\" that represent the app name are updated to \"Calorieman\" (without changing technical identifiers like package names unless explicitly required).",
+      "reqIds": [
+        "REQ-35"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-post-login-profile-setup-flow-to-collect-the-additional-profile-fields-needed-for-bmi-and-maintenance-calorie-calculation-height-age-sex-activity-level-and-persist-them-to-the-backend-as-part-of-the-caller-s-profile",
+      "title": "Update the post-login profile setup flow to collect the additional profile fields needed for BMI and maintenance calorie calculation (height, age, sex, activity level) and persist them to the backend as part of the caller’s profile.",
+      "reqIds": [
+        "REQ-38"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-persistent-maintenance-calories-area-on-the-dashboard-that-is-visible-whenever-the-user-is-logged-in-and-shows-1-the-user-s-maintenance-calories-tdee-2-today-s-consumed-calories-3-whether-today-is-above-below-equal-to-maintenance-with-the-numeric-difference-and-4-the-user-s-bmi-with-a-simple-category-label-if-the-profile-is-missing-required-inputs-show-an-english-prompt-telling-the-user-which-profile-fields-are-needed",
+      "title": "Add a persistent “Maintenance Calories” area on the Dashboard that is visible whenever the user is logged in and shows: (1) the user’s maintenance calories (TDEE), (2) today’s consumed calories, (3) whether today is above/below/equal to maintenance (with the numeric difference), and (4) the user’s BMI with a simple category label. If the profile is missing required inputs, show an English prompt telling the user which profile fields are needed.",
+      "reqIds": [
+        "REQ-39"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-rename-the-app-website-user-facing-name-to-calorieshivam-across-the-web-app-and-android-wrapper-updating-all-visible-branding-strings-header-brand-label-login-page-title-image-alt-text-footer-copyright-browser-tab-title-and-android-wrapper-user-facing-name-and-documentation-headings-keep-technical-identifiers-e-g-android-package-name-variable-resource-keys-like-nutriscan-base-url-unchanged-unless-strictly-necessary-for-build-correctness",
+      "title": "Rename the app/website user-facing name to “Calorieshivam” across the web app and Android wrapper, updating all visible branding strings (header brand label, login page title, image alt text, footer copyright, browser tab title) and Android wrapper user-facing name and documentation headings. Keep technical identifiers (e.g., Android package name, variable/resource keys like `nutriscan_base_url`) unchanged unless strictly necessary for build correctness.",
+      "reqIds": [
+        "REQ-40"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -284,10 +396,62 @@
       "summary": "Add an automatic weekly (7-day) summary with goal-aligned feedback: macro/nutrition suggestions and a 1–10 score/rating with congratulatory messaging when on track.",
       "reqIds": [],
       "status": "pending"
+    },
+    {
+      "id": "AR-16",
+      "summary": "Make the voice input button in the scan summary step more prominent (blue color, medium size).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-17",
+      "summary": "Package the existing NutriScan web app as an Android APK (WebView wrapper) suitable for uploading to the Google Play Store.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-18",
+      "summary": "Add BMI calculation (and related health metrics as needed) using user profile data (e.g., height/weight) and surface it in the app.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-19",
+      "summary": "Collect additional user profile fields needed to compute maintenance calories (TDEE)—e.g., height, age, sex, activity level—stored per logged-in user.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-20",
+      "summary": "Compute and display each user’s maintenance calories (TDEE) locally from profile data, and show a persistent Dashboard section indicating whether today’s calories are above/below/equal to maintenance.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-21",
+      "summary": "Rename app/website user-facing name to \"calorieshivam\" (update branding text such as header/login title/tab title and Android app name accordingly).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-22",
+      "summary": "Extend the per-user profile data model to store the additional fields required to compute BMI and maintenance calories (TDEE), including at minimum: height, age, sex, and activity level, while preserving existing fields (name, bodyGoal) and keeping data isolated per Internet Identity principal.",
+      "reqIds": [
+        "REQ-36"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-23",
+      "summary": "Add backend logic to compute BMI and maintenance calories (TDEE) deterministically from the caller’s stored profile data, and expose it via a dedicated query API that the frontend can call (e.g., `getCallerHealthMetrics`). Include computed values at minimum: BMI, BMI category label, BMR, and TDEE (maintenance calories).",
+      "reqIds": [
+        "REQ-37"
+      ],
+      "status": "pending"
     }
   ],
   "gameProjectType": "none",
-  "projectName": "NutriScan",
+  "projectName": "calorieshivam",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

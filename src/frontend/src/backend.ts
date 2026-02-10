@@ -115,6 +115,12 @@ export interface FoodEntry {
     };
     foodLabel: string;
 }
+export interface HealthMetrics {
+    bmi: number;
+    bmr: number;
+    bmiCategory: string;
+    tdee: number;
+}
 export interface BodyGoalDetails {
     goalType: GoalType;
     weeklyGoalSpeed: number;
@@ -131,8 +137,19 @@ export interface WeeklyFeedback {
     entriesPerDay: number;
 }
 export interface UserProfile {
+    age?: bigint;
+    sex?: Sex;
+    activityLevel?: ActivityLevel;
+    heightCm?: number;
     name: string;
     bodyGoal?: BodyGoalDetails;
+}
+export enum ActivityLevel {
+    lightlyActive = "lightlyActive",
+    extraActive = "extraActive",
+    veryActive = "veryActive",
+    moderatelyActive = "moderatelyActive",
+    sedentary = "sedentary"
 }
 export enum FeedbackType {
     offBalance = "offBalance",
@@ -147,6 +164,10 @@ export enum GoalType {
     maintain = "maintain",
     gainWeight = "gainWeight",
     loseWeight = "loseWeight"
+}
+export enum Sex {
+    female = "female",
+    male = "male"
 }
 export enum UserRole {
     admin = "admin",
@@ -165,6 +186,7 @@ export interface backendInterface {
         sugar: number;
     }, portionSize: number, confidenceLevel: number): Promise<bigint>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
+    getCallerHealthMetrics(): Promise<HealthMetrics>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getFoodEntriesForCaller(startDay: bigint, endDay: bigint): Promise<Array<FoodEntry>>;
@@ -176,7 +198,7 @@ export interface backendInterface {
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     updateBodyGoal(details: BodyGoalDetails): Promise<void>;
 }
-import type { BodyGoalDetails as _BodyGoalDetails, FeedbackType as _FeedbackType, GoalType as _GoalType, UserProfile as _UserProfile, UserRole as _UserRole, WeeklyFeedback as _WeeklyFeedback } from "./declarations/backend.did.d.ts";
+import type { ActivityLevel as _ActivityLevel, BodyGoalDetails as _BodyGoalDetails, FeedbackType as _FeedbackType, GoalType as _GoalType, Sex as _Sex, UserProfile as _UserProfile, UserRole as _UserRole, WeeklyFeedback as _WeeklyFeedback } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
     async _initializeAccessControlWithSecret(arg0: string): Promise<void> {
@@ -229,6 +251,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async getCallerHealthMetrics(): Promise<HealthMetrics> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getCallerHealthMetrics();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getCallerHealthMetrics();
+            return result;
+        }
+    }
     async getCallerUserProfile(): Promise<UserProfile | null> {
         if (this.processError) {
             try {
@@ -247,14 +283,14 @@ export class Backend implements backendInterface {
         if (this.processError) {
             try {
                 const result = await this.actor.getCallerUserRole();
-                return from_candid_UserRole_n11(this._uploadFile, this._downloadFile, result);
+                return from_candid_UserRole_n19(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getCallerUserRole();
-            return from_candid_UserRole_n11(this._uploadFile, this._downloadFile, result);
+            return from_candid_UserRole_n19(this._uploadFile, this._downloadFile, result);
         }
     }
     async getFoodEntriesForCaller(arg0: bigint, arg1: bigint): Promise<Array<FoodEntry>> {
@@ -317,14 +353,14 @@ export class Backend implements backendInterface {
         if (this.processError) {
             try {
                 const result = await this.actor.getWeeklyFeedback();
-                return from_candid_WeeklyFeedback_n13(this._uploadFile, this._downloadFile, result);
+                return from_candid_WeeklyFeedback_n21(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getWeeklyFeedback();
-            return from_candid_WeeklyFeedback_n13(this._uploadFile, this._downloadFile, result);
+            return from_candid_WeeklyFeedback_n21(this._uploadFile, this._downloadFile, result);
         }
     }
     async isCallerAdmin(): Promise<boolean> {
@@ -344,57 +380,93 @@ export class Backend implements backendInterface {
     async saveCallerUserProfile(arg0: UserProfile): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor.saveCallerUserProfile(to_candid_UserProfile_n17(this._uploadFile, this._downloadFile, arg0));
+                const result = await this.actor.saveCallerUserProfile(to_candid_UserProfile_n25(this._uploadFile, this._downloadFile, arg0));
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.saveCallerUserProfile(to_candid_UserProfile_n17(this._uploadFile, this._downloadFile, arg0));
+            const result = await this.actor.saveCallerUserProfile(to_candid_UserProfile_n25(this._uploadFile, this._downloadFile, arg0));
             return result;
         }
     }
     async updateBodyGoal(arg0: BodyGoalDetails): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor.updateBodyGoal(to_candid_BodyGoalDetails_n19(this._uploadFile, this._downloadFile, arg0));
+                const result = await this.actor.updateBodyGoal(to_candid_BodyGoalDetails_n31(this._uploadFile, this._downloadFile, arg0));
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.updateBodyGoal(to_candid_BodyGoalDetails_n19(this._uploadFile, this._downloadFile, arg0));
+            const result = await this.actor.updateBodyGoal(to_candid_BodyGoalDetails_n31(this._uploadFile, this._downloadFile, arg0));
             return result;
         }
     }
 }
-function from_candid_BodyGoalDetails_n7(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _BodyGoalDetails): BodyGoalDetails {
-    return from_candid_record_n8(_uploadFile, _downloadFile, value);
+function from_candid_ActivityLevel_n11(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _ActivityLevel): ActivityLevel {
+    return from_candid_variant_n12(_uploadFile, _downloadFile, value);
 }
-function from_candid_FeedbackType_n15(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _FeedbackType): FeedbackType {
-    return from_candid_variant_n16(_uploadFile, _downloadFile, value);
+function from_candid_BodyGoalDetails_n15(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _BodyGoalDetails): BodyGoalDetails {
+    return from_candid_record_n16(_uploadFile, _downloadFile, value);
 }
-function from_candid_GoalType_n9(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _GoalType): GoalType {
-    return from_candid_variant_n10(_uploadFile, _downloadFile, value);
+function from_candid_FeedbackType_n23(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _FeedbackType): FeedbackType {
+    return from_candid_variant_n24(_uploadFile, _downloadFile, value);
+}
+function from_candid_GoalType_n17(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _GoalType): GoalType {
+    return from_candid_variant_n18(_uploadFile, _downloadFile, value);
+}
+function from_candid_Sex_n8(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _Sex): Sex {
+    return from_candid_variant_n9(_uploadFile, _downloadFile, value);
 }
 function from_candid_UserProfile_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _UserProfile): UserProfile {
     return from_candid_record_n5(_uploadFile, _downloadFile, value);
 }
-function from_candid_UserRole_n11(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _UserRole): UserRole {
-    return from_candid_variant_n12(_uploadFile, _downloadFile, value);
+function from_candid_UserRole_n19(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _UserRole): UserRole {
+    return from_candid_variant_n20(_uploadFile, _downloadFile, value);
 }
-function from_candid_WeeklyFeedback_n13(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _WeeklyFeedback): WeeklyFeedback {
-    return from_candid_record_n14(_uploadFile, _downloadFile, value);
+function from_candid_WeeklyFeedback_n21(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _WeeklyFeedback): WeeklyFeedback {
+    return from_candid_record_n22(_uploadFile, _downloadFile, value);
+}
+function from_candid_opt_n10(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_ActivityLevel]): ActivityLevel | null {
+    return value.length === 0 ? null : from_candid_ActivityLevel_n11(_uploadFile, _downloadFile, value[0]);
+}
+function from_candid_opt_n13(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [number]): number | null {
+    return value.length === 0 ? null : value[0];
+}
+function from_candid_opt_n14(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_BodyGoalDetails]): BodyGoalDetails | null {
+    return value.length === 0 ? null : from_candid_BodyGoalDetails_n15(_uploadFile, _downloadFile, value[0]);
 }
 function from_candid_opt_n3(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_UserProfile]): UserProfile | null {
     return value.length === 0 ? null : from_candid_UserProfile_n4(_uploadFile, _downloadFile, value[0]);
 }
-function from_candid_opt_n6(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_BodyGoalDetails]): BodyGoalDetails | null {
-    return value.length === 0 ? null : from_candid_BodyGoalDetails_n7(_uploadFile, _downloadFile, value[0]);
+function from_candid_opt_n6(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [bigint]): bigint | null {
+    return value.length === 0 ? null : value[0];
 }
-function from_candid_record_n14(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+function from_candid_opt_n7(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_Sex]): Sex | null {
+    return value.length === 0 ? null : from_candid_Sex_n8(_uploadFile, _downloadFile, value[0]);
+}
+function from_candid_record_n16(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    goalType: _GoalType;
+    weeklyGoalSpeed: number;
+    targetWeight: number;
+    currentWeight: number;
+}): {
+    goalType: GoalType;
+    weeklyGoalSpeed: number;
+    targetWeight: number;
+    currentWeight: number;
+} {
+    return {
+        goalType: from_candid_GoalType_n17(_uploadFile, _downloadFile, value.goalType),
+        weeklyGoalSpeed: value.weeklyGoalSpeed,
+        targetWeight: value.targetWeight,
+        currentWeight: value.currentWeight
+    };
+}
+function from_candid_record_n22(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     totalCarbs: number;
     feedbackType: _FeedbackType;
     avgCalories: number;
@@ -413,7 +485,7 @@ function from_candid_record_n14(_uploadFile: (file: ExternalBlob) => Promise<Uin
 } {
     return {
         totalCarbs: value.totalCarbs,
-        feedbackType: from_candid_FeedbackType_n15(_uploadFile, _downloadFile, value.feedbackType),
+        feedbackType: from_candid_FeedbackType_n23(_uploadFile, _downloadFile, value.feedbackType),
         avgCalories: value.avgCalories,
         totalFat: value.totalFat,
         entriesChecked: value.entriesChecked,
@@ -422,36 +494,43 @@ function from_candid_record_n14(_uploadFile: (file: ExternalBlob) => Promise<Uin
     };
 }
 function from_candid_record_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    age: [] | [bigint];
+    sex: [] | [_Sex];
+    activityLevel: [] | [_ActivityLevel];
+    heightCm: [] | [number];
     name: string;
     bodyGoal: [] | [_BodyGoalDetails];
 }): {
+    age?: bigint;
+    sex?: Sex;
+    activityLevel?: ActivityLevel;
+    heightCm?: number;
     name: string;
     bodyGoal?: BodyGoalDetails;
 } {
     return {
+        age: record_opt_to_undefined(from_candid_opt_n6(_uploadFile, _downloadFile, value.age)),
+        sex: record_opt_to_undefined(from_candid_opt_n7(_uploadFile, _downloadFile, value.sex)),
+        activityLevel: record_opt_to_undefined(from_candid_opt_n10(_uploadFile, _downloadFile, value.activityLevel)),
+        heightCm: record_opt_to_undefined(from_candid_opt_n13(_uploadFile, _downloadFile, value.heightCm)),
         name: value.name,
-        bodyGoal: record_opt_to_undefined(from_candid_opt_n6(_uploadFile, _downloadFile, value.bodyGoal))
+        bodyGoal: record_opt_to_undefined(from_candid_opt_n14(_uploadFile, _downloadFile, value.bodyGoal))
     };
 }
-function from_candid_record_n8(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
-    goalType: _GoalType;
-    weeklyGoalSpeed: number;
-    targetWeight: number;
-    currentWeight: number;
-}): {
-    goalType: GoalType;
-    weeklyGoalSpeed: number;
-    targetWeight: number;
-    currentWeight: number;
-} {
-    return {
-        goalType: from_candid_GoalType_n9(_uploadFile, _downloadFile, value.goalType),
-        weeklyGoalSpeed: value.weeklyGoalSpeed,
-        targetWeight: value.targetWeight,
-        currentWeight: value.currentWeight
-    };
+function from_candid_variant_n12(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    lightlyActive: null;
+} | {
+    extraActive: null;
+} | {
+    veryActive: null;
+} | {
+    moderatelyActive: null;
+} | {
+    sedentary: null;
+}): ActivityLevel {
+    return "lightlyActive" in value ? ActivityLevel.lightlyActive : "extraActive" in value ? ActivityLevel.extraActive : "veryActive" in value ? ActivityLevel.veryActive : "moderatelyActive" in value ? ActivityLevel.moderatelyActive : "sedentary" in value ? ActivityLevel.sedentary : value;
 }
-function from_candid_variant_n10(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+function from_candid_variant_n18(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     gainMuscle: null;
 } | {
     maintain: null;
@@ -462,7 +541,7 @@ function from_candid_variant_n10(_uploadFile: (file: ExternalBlob) => Promise<Ui
 }): GoalType {
     return "gainMuscle" in value ? GoalType.gainMuscle : "maintain" in value ? GoalType.maintain : "gainWeight" in value ? GoalType.gainWeight : "loseWeight" in value ? GoalType.loseWeight : value;
 }
-function from_candid_variant_n12(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+function from_candid_variant_n20(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     admin: null;
 } | {
     user: null;
@@ -471,7 +550,7 @@ function from_candid_variant_n12(_uploadFile: (file: ExternalBlob) => Promise<Ui
 }): UserRole {
     return "admin" in value ? UserRole.admin : "user" in value ? UserRole.user : "guest" in value ? UserRole.guest : value;
 }
-function from_candid_variant_n16(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+function from_candid_variant_n24(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     offBalance: null;
 } | {
     goodJob: null;
@@ -486,31 +565,56 @@ function from_candid_variant_n16(_uploadFile: (file: ExternalBlob) => Promise<Ui
 }): FeedbackType {
     return "offBalance" in value ? FeedbackType.offBalance : "goodJob" in value ? FeedbackType.goodJob : "notEnoughData" in value ? FeedbackType.notEnoughData : "overrange" in value ? FeedbackType.overrange : "underrange" in value ? FeedbackType.underrange : "partialFocus" in value ? FeedbackType.partialFocus : value;
 }
-function to_candid_BodyGoalDetails_n19(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: BodyGoalDetails): _BodyGoalDetails {
-    return to_candid_record_n20(_uploadFile, _downloadFile, value);
+function from_candid_variant_n9(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    female: null;
+} | {
+    male: null;
+}): Sex {
+    return "female" in value ? Sex.female : "male" in value ? Sex.male : value;
 }
-function to_candid_GoalType_n21(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: GoalType): _GoalType {
-    return to_candid_variant_n22(_uploadFile, _downloadFile, value);
+function to_candid_ActivityLevel_n29(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: ActivityLevel): _ActivityLevel {
+    return to_candid_variant_n30(_uploadFile, _downloadFile, value);
 }
-function to_candid_UserProfile_n17(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: UserProfile): _UserProfile {
-    return to_candid_record_n18(_uploadFile, _downloadFile, value);
+function to_candid_BodyGoalDetails_n31(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: BodyGoalDetails): _BodyGoalDetails {
+    return to_candid_record_n32(_uploadFile, _downloadFile, value);
+}
+function to_candid_GoalType_n33(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: GoalType): _GoalType {
+    return to_candid_variant_n34(_uploadFile, _downloadFile, value);
+}
+function to_candid_Sex_n27(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Sex): _Sex {
+    return to_candid_variant_n28(_uploadFile, _downloadFile, value);
+}
+function to_candid_UserProfile_n25(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: UserProfile): _UserProfile {
+    return to_candid_record_n26(_uploadFile, _downloadFile, value);
 }
 function to_candid_UserRole_n1(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: UserRole): _UserRole {
     return to_candid_variant_n2(_uploadFile, _downloadFile, value);
 }
-function to_candid_record_n18(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+function to_candid_record_n26(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    age?: bigint;
+    sex?: Sex;
+    activityLevel?: ActivityLevel;
+    heightCm?: number;
     name: string;
     bodyGoal?: BodyGoalDetails;
 }): {
+    age: [] | [bigint];
+    sex: [] | [_Sex];
+    activityLevel: [] | [_ActivityLevel];
+    heightCm: [] | [number];
     name: string;
     bodyGoal: [] | [_BodyGoalDetails];
 } {
     return {
+        age: value.age ? candid_some(value.age) : candid_none(),
+        sex: value.sex ? candid_some(to_candid_Sex_n27(_uploadFile, _downloadFile, value.sex)) : candid_none(),
+        activityLevel: value.activityLevel ? candid_some(to_candid_ActivityLevel_n29(_uploadFile, _downloadFile, value.activityLevel)) : candid_none(),
+        heightCm: value.heightCm ? candid_some(value.heightCm) : candid_none(),
         name: value.name,
-        bodyGoal: value.bodyGoal ? candid_some(to_candid_BodyGoalDetails_n19(_uploadFile, _downloadFile, value.bodyGoal)) : candid_none()
+        bodyGoal: value.bodyGoal ? candid_some(to_candid_BodyGoalDetails_n31(_uploadFile, _downloadFile, value.bodyGoal)) : candid_none()
     };
 }
-function to_candid_record_n20(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+function to_candid_record_n32(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     goalType: GoalType;
     weeklyGoalSpeed: number;
     targetWeight: number;
@@ -522,7 +626,7 @@ function to_candid_record_n20(_uploadFile: (file: ExternalBlob) => Promise<Uint8
     currentWeight: number;
 } {
     return {
-        goalType: to_candid_GoalType_n21(_uploadFile, _downloadFile, value.goalType),
+        goalType: to_candid_GoalType_n33(_uploadFile, _downloadFile, value.goalType),
         weeklyGoalSpeed: value.weeklyGoalSpeed,
         targetWeight: value.targetWeight,
         currentWeight: value.currentWeight
@@ -543,7 +647,41 @@ function to_candid_variant_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint8
         guest: null
     } : value;
 }
-function to_candid_variant_n22(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: GoalType): {
+function to_candid_variant_n28(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Sex): {
+    female: null;
+} | {
+    male: null;
+} {
+    return value == Sex.female ? {
+        female: null
+    } : value == Sex.male ? {
+        male: null
+    } : value;
+}
+function to_candid_variant_n30(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: ActivityLevel): {
+    lightlyActive: null;
+} | {
+    extraActive: null;
+} | {
+    veryActive: null;
+} | {
+    moderatelyActive: null;
+} | {
+    sedentary: null;
+} {
+    return value == ActivityLevel.lightlyActive ? {
+        lightlyActive: null
+    } : value == ActivityLevel.extraActive ? {
+        extraActive: null
+    } : value == ActivityLevel.veryActive ? {
+        veryActive: null
+    } : value == ActivityLevel.moderatelyActive ? {
+        moderatelyActive: null
+    } : value == ActivityLevel.sedentary ? {
+        sedentary: null
+    } : value;
+}
+function to_candid_variant_n34(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: GoalType): {
     gainMuscle: null;
 } | {
     maintain: null;

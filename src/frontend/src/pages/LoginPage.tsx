@@ -11,14 +11,14 @@ export default function LoginPage() {
           <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
             <img 
               src="/assets/generated/app-logo-s.dim_512x512.png" 
-              alt="NutriScan Logo"
+              alt="Calorieshivam Logo"
               className="w-full h-full object-cover"
             />
           </div>
         </div>
         
         <div className="space-y-2">
-          <h1 className="text-4xl font-bold tracking-tight">NutriScan</h1>
+          <h1 className="text-4xl font-bold tracking-tight">Calorieshivam</h1>
           <p className="text-lg text-muted-foreground">
             Track your nutrition with smart food scanning
           </p>

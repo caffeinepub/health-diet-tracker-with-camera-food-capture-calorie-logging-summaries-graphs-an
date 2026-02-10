@@ -18,10 +18,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { GoalType } from '@/backend';
+import { GoalType, Sex, ActivityLevel } from '@/backend';
 
 export default function ProfileSetupDialog() {
   const [name, setName] = useState('');
+  const [heightCm, setHeightCm] = useState('');
+  const [age, setAge] = useState('');
+  const [sex, setSex] = useState<Sex | ''>('');
+  const [activityLevel, setActivityLevel] = useState<ActivityLevel | ''>('');
   const [goalType, setGoalType] = useState<GoalType | ''>('');
   const [currentWeight, setCurrentWeight] = useState('');
   const [targetWeight, setTargetWeight] = useState('');
@@ -37,6 +41,11 @@ export default function ProfileSetupDialog() {
       return;
     }
 
+    if (!heightCm || !age || !sex || !activityLevel) {
+      toast.error('Please fill in all health profile fields');
+      return;
+    }
+
     if (!goalType) {
       toast.error('Please select a body goal');
       return;
@@ -47,23 +56,29 @@ export default function ProfileSetupDialog() {
       return;
     }
 
+    const heightCmNum = parseFloat(heightCm);
+    const ageNum = parseInt(age, 10);
     const currentWeightNum = parseFloat(currentWeight);
     const targetWeightNum = parseFloat(targetWeight);
     const weeklyGoalSpeedNum = parseFloat(weeklyGoalSpeed);
 
-    if (isNaN(currentWeightNum) || isNaN(targetWeightNum) || isNaN(weeklyGoalSpeedNum)) {
-      toast.error('Please enter valid numbers for weight fields');
+    if (isNaN(heightCmNum) || isNaN(ageNum) || isNaN(currentWeightNum) || isNaN(targetWeightNum) || isNaN(weeklyGoalSpeedNum)) {
+      toast.error('Please enter valid numbers for all fields');
       return;
     }
 
-    if (currentWeightNum <= 0 || targetWeightNum <= 0 || weeklyGoalSpeedNum <= 0) {
-      toast.error('Weight values must be positive');
+    if (heightCmNum <= 0 || ageNum <= 0 || currentWeightNum <= 0 || targetWeightNum <= 0 || weeklyGoalSpeedNum <= 0) {
+      toast.error('All values must be positive');
       return;
     }
 
     try {
       await saveProfile.mutateAsync({
         name: name.trim(),
+        heightCm: heightCmNum,
+        age: BigInt(ageNum),
+        sex: sex as Sex,
+        activityLevel: activityLevel as ActivityLevel,
         bodyGoal: {
           goalType: goalType as GoalType,
           currentWeight: currentWeightNum,
@@ -86,9 +101,9 @@ export default function ProfileSetupDialog() {
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle>Welcome to NutriScan!</DialogTitle>
+          <DialogTitle>Complete Your Profile</DialogTitle>
           <DialogDescription>
-            Let's set up your profile and body goals to get started
+            Let's set up your profile to calculate your personalized maintenance calories
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -102,6 +117,63 @@ export default function ProfileSetupDialog() {
               autoFocus
               required
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="heightCm">Height (cm)</Label>
+            <Input
+              id="heightCm"
+              type="number"
+              step="0.1"
+              min="1"
+              value={heightCm}
+              onChange={(e) => setHeightCm(e.target.value)}
+              placeholder="e.g., 170"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="age">Age (years)</Label>
+            <Input
+              id="age"
+              type="number"
+              min="1"
+              max="120"
+              value={age}
+              onChange={(e) => setAge(e.target.value)}
+              placeholder="e.g., 30"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="sex">Sex</Label>
+            <Select value={sex} onValueChange={(value) => setSex(value as Sex)}>
+              <SelectTrigger id="sex">
+                <SelectValue placeholder="Select your sex" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={Sex.male}>Male</SelectItem>
+                <SelectItem value={Sex.female}>Female</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="activityLevel">Activity Level</Label>
+            <Select value={activityLevel} onValueChange={(value) => setActivityLevel(value as ActivityLevel)}>
+              <SelectTrigger id="activityLevel">
+                <SelectValue placeholder="Select your activity level" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ActivityLevel.sedentary}>Sedentary (little or no exercise)</SelectItem>
+                <SelectItem value={ActivityLevel.lightlyActive}>Lightly Active (1-3 days/week)</SelectItem>
+                <SelectItem value={ActivityLevel.moderatelyActive}>Moderately Active (3-5 days/week)</SelectItem>
+                <SelectItem value={ActivityLevel.veryActive}>Very Active (6-7 days/week)</SelectItem>
+                <SelectItem value={ActivityLevel.extraActive}>Extra Active (intense daily exercise)</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">

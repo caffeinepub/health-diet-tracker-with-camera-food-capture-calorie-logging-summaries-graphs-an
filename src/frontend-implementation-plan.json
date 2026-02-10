@@ -1,138 +1,103 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Speech-to-text meal description in scan confirmation + automatic weekly summary feedback",
+  "title": "Add per-user BMI/TDEE UI and rename branding to Calorieshivam",
   "requirements": [
     {
-      "id": "REQ-20",
-      "summary": "Add optional on-device speech-to-text dictation to the scan confirmation step with editable transcription and graceful fallback.",
+      "id": "REQ-38",
+      "summary": "Extend the post-login profile setup UI to collect height, age, sex, and activity level and persist them with the existing per-user profile.",
       "acceptanceCriteria": [
-        "In the scan confirmation step (the page that currently shows “Confirm Food Details”), there is a clear control (e.g., a microphone button) to start/stop dictation.",
-        "Dictation converts the user’s spoken words into text in a visible editable text field.",
-        "The user can edit the transcribed text before saving.",
-        "If the browser/device does not support speech recognition or permission is denied, the UI shows an English message explaining the issue and still allows manual typing without blocking the flow."
+        "The profile setup UI includes inputs for height, age, sex, and activity level in addition to the existing name/body-goal fields.",
+        "Form validation prevents saving clearly invalid values (e.g., non-positive height/age).",
+        "Submitting the setup form persists the new fields along with the existing profile fields via the existing profile-save hook.",
+        "All user-facing text in the profile setup dialog is in English and does not reference old app names (e.g., remove/replace the existing “Welcome to NutriScan!” text)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useSpeechToText.ts",
-          "operation": "create",
-          "description": "Create a React hook that wraps the browser Web Speech API (SpeechRecognition / webkitSpeechRecognition) to support start/stop dictation, interim/final transcript updates, and error states (not-supported, permission denied). Use only local/on-device speech recognition and expose English error messages for the UI."
+          "path": "frontend/src/components/auth/ProfileSetupDialog.tsx",
+          "operation": "modify",
+          "description": "Add controlled inputs for height (cm), age, sex, and activity level, validate values (required + positive ranges), and include the new fields (heightCm, age, sex, activityLevel) when calling the existing useSaveCallerUserProfile mutation. Also update the dialog title/description to English branding-neutral copy (no “NutriScan”). Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/components/entries/EstimationConfirmationStep.tsx",
+          "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Add an optional meal description field to the “Confirm Food Details” step and integrate dictation controls using the new useSpeechToText hook (microphone start/stop). Ensure transcription is shown in an editable text input/textarea, allow manual edits at any time, and show a clear English fallback message when speech recognition is unavailable or permission is denied without blocking saving."
+          "description": "Update the profile-completeness gating logic so the post-login setup flow continues until the required BMI/TDEE inputs (heightCm, age, sex, activityLevel) are present in addition to existing name/bodyGoal checks. Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
-      "id": "REQ-21",
-      "summary": "Persist the spoken/edited meal description from scan confirmation into saved entries and display it in existing entry list/details UI without breaking manual entry.",
+      "id": "REQ-39",
+      "summary": "Add a persistent Maintenance Calories (TDEE) + BMI dashboard section that reacts to today’s entries and prompts for missing profile inputs.",
       "acceptanceCriteria": [
-        "When saving an entry from the scan flow, the saved entry reflects the user’s edited dictated description (not only the auto-detected food name).",
-        "The stored description is visible wherever the app currently displays the entry label/details (e.g., today’s entries list and entry details dialog).",
-        "No existing manual-entry flow is broken by this change."
+        "Dashboard shows a clearly visible card/section with TDEE (maintenance calories) and BMI for logged-in users.",
+        "The section indicates Above/Below/At maintenance based on today’s total calories vs TDEE, including the difference in kcal.",
+        "If the user profile lacks required fields for calculation, the section renders an English call-to-action message instead of broken/blank values.",
+        "The section updates correctly as today’s entries change (reactive to existing today totals)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useFoodEntries.ts",
-          "operation": "modify",
-          "description": "Update the add-food-entry mutation to include a description string parameter and pass arguments in the correct order to the backend actor so the entry description is persisted. Keep description optional at call sites by allowing an empty string default."
-        },
-        {
-          "path": "frontend/src/components/entries/EstimationConfirmationStep.tsx",
-          "operation": "modify",
-          "description": "Wire the scan confirmation’s editable description (including dictated/edited text) into the save action by passing it to useAddFoodEntry so it becomes the entry’s persisted description."
-        },
-        {
-          "path": "frontend/src/pages/AddEntryPage.tsx",
-          "operation": "modify",
-          "description": "Ensure the manual add-entry flow continues to work by supplying a description value to useAddFoodEntry (default empty string). Optionally add a non-required 'Description' field if it fits the existing form layout, without changing required validation for the existing fields."
-        },
-        {
-          "path": "frontend/src/components/entries/TodayEntriesList.tsx",
-          "operation": "modify",
-          "description": "Display the entry description (when present) in the existing today entries list UI in a compact, readable way while keeping the existing foodLabel and calories display."
-        },
-        {
-          "path": "frontend/src/components/entries/EntryDetailsDialog.tsx",
-          "operation": "modify",
-          "description": "Add an English-labeled section in the entry details dialog to show the saved entry description (when non-empty) alongside existing nutrient details."
-        }
-      ]
-    },
-    {
-      "id": "REQ-22",
-      "summary": "Add an automatic “Weekly Summary (Last 7 Days)” section on the Dashboard showing totals/averages, a 1–10 score, and an English feedback message with an insufficient-data state.",
-      "acceptanceCriteria": [
-        "The Dashboard includes a “Weekly Summary (Last 7 Days)” section that appears without the user needing to manually trigger generation.",
-        "The weekly summary displays: (1) last-7-days totals/averages (at minimum calories and macros), (2) a numeric score from 1 to 10, and (3) a short English feedback message.",
-        "When the score indicates the user is doing well, the summary shows an English congratulatory message.",
-        "If there is insufficient data (e.g., no entries in the last 7 days), the section shows an English empty/insufficient-data state rather than failing silently."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/utils/weeklyFeedback.ts",
+          "path": "frontend/src/hooks/useCallerHealthMetrics.ts",
           "operation": "create",
-          "description": "Implement deterministic, fully local helper functions to compute last-7-days totals/averages (calories + macros), determine whether there is sufficient data, and produce a 1–10 score plus an English feedback message based on simple rules."
+          "description": "Create a React Query hook that calls the backend capability actor.getCallerHealthMetrics and caches the result for the authenticated user; ensure it is enabled only when the actor is available. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/components/graphs/WeeklySummaryCard.tsx",
+          "path": "frontend/src/components/dashboard/MaintenanceCaloriesCard.tsx",
           "operation": "create",
-          "description": "Create a Dashboard-ready Weekly Summary card component that renders: (1) calories/macros totals/averages, (2) a numeric 1–10 score, (3) an English feedback message (including congratulatory text when on track), and (4) an English insufficient-data state when last-7-days entries are missing."
+          "description": "Create a dashboard card component that displays: TDEE, today’s consumed calories, Above/Below/At maintenance with kcal difference, and BMI with category label. If required profile fields are missing, render an English prompt listing which fields are needed (derive missing fields from the current UserProfile shape). Verify the component's usage instructions before implementing."
         },
         {
           "path": "frontend/src/pages/DashboardPage.tsx",
           "operation": "modify",
-          "description": "Fetch the last 7 days of entries using existing useGetFoodEntries (rangeStart=today-6, rangeEnd=today) and render the new “Weekly Summary (Last 7 Days)” section automatically on the Dashboard using WeeklySummaryCard (no manual trigger). Ensure all user-facing labels are in English."
+          "description": "Wire the new MaintenanceCaloriesCard into the dashboard in a clearly visible location for logged-in users; pass today’s total calories (existing memoized totals) and the current user profile; integrate the useCallerHealthMetrics hook for BMI/TDEE display and keep the card reactive as todayEntries change. Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
-      "id": "REQ-23",
-      "summary": "Render the weekly 1–10 rating as a clear, visually engaging visualization consistent with existing Tailwind/shadcn styling.",
+      "id": "REQ-40",
+      "summary": "Rename all user-facing branding to “Calorieshivam” across the web app UI and Android wrapper without changing technical identifiers.",
       "acceptanceCriteria": [
-        "The weekly summary shows a visual rating element that clearly communicates the 1–10 score at a glance.",
-        "The rating visualization and weekly summary card use existing Tailwind/Shadcn styling patterns used elsewhere in the app.",
-        "All user-facing labels in the weekly summary are in English."
+        "Web app header brand text displays “Calorieshivam”.",
+        "Login page displays “Calorieshivam” and any logo alt text reflects the new name.",
+        "Browser tab title in `frontend/index.html` uses “Calorieshivam” and keeps the rest of the title text in English.",
+        "Footer text no longer references “Calorieman” and uses “Calorieshivam”.",
+        "Android wrapper `app_name` string is “Calorieshivam” and wrapper README heading/content references “Calorieshivam” where it is a user-facing app name.",
+        "No required build changes rename technical identifiers like the Android package (`com/nutriscan/wrapper`) unless needed to compile."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/graphs/WeeklyRatingScale.tsx",
-          "operation": "create",
-          "description": "Create a reusable weekly rating visualization component that displays a 1–10 score at a glance (e.g., segmented scale or star-like markers) using existing Tailwind patterns and composed shadcn/ui primitives (do not modify anything under frontend/src/components/ui)."
+          "path": "frontend/src/components/layout/AppHeader.tsx",
+          "operation": "modify",
+          "description": "Update the header brand label text to “Calorieshivam” and update the logo image alt text to reflect the new name. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/components/graphs/WeeklySummaryCard.tsx",
+          "path": "frontend/src/pages/LoginPage.tsx",
           "operation": "modify",
-          "description": "Integrate WeeklyRatingScale into the Weekly Summary card to visually represent the computed 1–10 score alongside the numeric value, keeping styling consistent with other Dashboard cards."
-        }
-      ]
-    },
-    {
-      "id": "REQ-24",
-      "summary": "Generate weekly feedback using deterministic local rules referencing the user’s stored body goal (if available) and last-7-days logged data, with concrete suggestions and per-user correctness.",
-      "acceptanceCriteria": [
-        "Weekly feedback generation does not call any external services/APIs.",
-        "If the user has a body goal configured, the weekly feedback references it (e.g., “Lose Weight”, “Gain Muscle”) in English.",
-        "The app produces at least one concrete suggestion when the score is not high (e.g., suggest increasing protein if protein share is low), based only on logged data and simple rules.",
-        "The feature works per-user (no data leakage across principals)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/utils/weeklyFeedback.ts",
-          "operation": "modify",
-          "description": "Extend the deterministic rules to incorporate the current user’s body goal (from the already-loaded user profile) into the English feedback text and ensure at least one actionable suggestion is produced when the score is not high, derived only from last-7-days totals/ratios."
+          "description": "Update login page title text to “Calorieshivam” and update the logo image alt text to “Calorieshivam”; ensure all user-facing strings remain English. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/components/graphs/WeeklySummaryCard.tsx",
+          "path": "frontend/src/components/layout/AppLayout.tsx",
           "operation": "modify",
-          "description": "Pass the current user’s body goal into the weekly feedback computation and render goal-referencing English text in the Weekly Summary UI. Ensure the component uses only the currently authenticated user’s entries/profile data already loaded on the Dashboard."
+          "description": "Update the footer copyright line to “Calorieshivam” and ensure it no longer references “Calorieman”; keep the rest of the footer English. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/pages/DashboardPage.tsx",
+          "path": "frontend/index.html",
           "operation": "modify",
-          "description": "Wire the current user profile’s body goal (if available) into WeeklySummaryCard so the feedback references it and remains per-user (based on the caller-scoped entries returned by existing data hooks)."
+          "description": "Update the browser tab title to start with “Calorieshivam” while keeping the rest of the title text in English."
+        },
+        {
+          "path": "frontend/android-wrapper/app/src/main/res/values/strings.xml",
+          "operation": "modify",
+          "description": "Change the user-facing app_name string to “Calorieshivam”; update any user-facing comments that mention the old app name while keeping technical keys (e.g., nutriscan_base_url) unchanged."
+        },
+        {
+          "path": "frontend/android-wrapper/README.md",
+          "operation": "modify",
+          "description": "Update README heading and user-facing references from “Calorieman” to “Calorieshivam” (do not rename technical identifiers unless required for build correctness)."
+        },
+        {
+          "path": "frontend/android-wrapper/settings.gradle",
+          "operation": "modify",
+          "description": "Update the Android wrapper rootProject.name to “Calorieshivam” to match the user-facing wrapper name (keep package/applicationId unchanged)."
         }
       ]
     }

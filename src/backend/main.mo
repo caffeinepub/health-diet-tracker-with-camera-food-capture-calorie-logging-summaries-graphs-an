@@ -7,14 +7,34 @@ import Float "mo:core/Float";
 import Nat "mo:core/Nat";
 import Int "mo:core/Int";
 import Order "mo:core/Order";
-import Migration "migration";
+
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
+import Migration "migration";
 
 (with migration = Migration.run)
 actor {
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
+
+  public type UserProfile = {
+    name : Text;
+    heightCm : ?Float;
+    age : ?Nat;
+    sex : ?Sex;
+    activityLevel : ?ActivityLevel;
+    bodyGoal : ?BodyGoalDetails;
+  };
+
+  public type Sex = { #male; #female };
+
+  public type ActivityLevel = {
+    #sedentary;
+    #lightlyActive;
+    #moderatelyActive;
+    #veryActive;
+    #extraActive;
+  };
 
   public type BodyGoalDetails = {
     goalType : GoalType;
@@ -30,9 +50,11 @@ actor {
     #maintain;
   };
 
-  public type UserProfile = {
-    name : Text;
-    bodyGoal : ?BodyGoalDetails;
+  public type HealthMetrics = {
+    bmi : Float;
+    bmiCategory : Text;
+    bmr : Float;
+    tdee : Float;
   };
 
   type FoodEntry = {
@@ -111,6 +133,86 @@ actor {
       Runtime.trap("Unauthorized: Only users can save profiles");
     };
     userProfiles.add(caller, profile);
+  };
+
+  public query ({ caller }) func getCallerHealthMetrics() : async HealthMetrics {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can view health metrics");
+    };
+    getHealthMetricsFromCallerProfile(caller);
+  };
+
+  func getHealthMetricsFromCallerProfile(caller : Principal) : HealthMetrics {
+    switch (userProfiles.get(caller)) {
+      case (null) { Runtime.trap("User profile not found") };
+      case (?profile) {
+        let heightCm = switch (profile.heightCm) {
+          case (null) { Runtime.trap("Missing height") };
+          case (?h) { h };
+        };
+        let weightKg = switch (profile.bodyGoal) {
+          case (null) { Runtime.trap("Missing weight") };
+          case (?goal) { goal.currentWeight };
+        };
+        let heightSquared = heightCm * heightCm;
+        let heightSquaredMeters = if (heightSquared > 10000.0) {
+          heightSquared * 0.0001;
+        } else { 1.0 };
+
+        // Use named helper for BMR
+        let bmr = calculateBMR(profile, weightKg, heightCm);
+
+        {
+          bmi = weightKg / heightSquaredMeters;
+          bmiCategory = classifyBMI(weightKg / heightSquaredMeters);
+          bmr;
+          tdee = calculateTDEE(// Calculate BMR via helper
+            calculateBMR(profile, weightKg, heightCm),
+            switch (profile.activityLevel) {
+              case (null) { #moderatelyActive };
+              case (?level) { level };
+            },
+          );
+        };
+      };
+    };
+  };
+
+  func classifyBMI(bmi : Float) : Text {
+    if (bmi < 18.5) {
+      "Underweight";
+    } else if (bmi < 25.0) {
+      "Normal";
+    } else if (bmi < 30.0) {
+      "Overweight";
+    } else { "Obese" };
+  };
+
+  func calculateBMR(profile : UserProfile, weightKg : Float, heightCm : Float) : Float {
+    switch (profile.sex, profile.age) {
+      case (?sex, ?age) { bmrBySex(weightKg, heightCm, age.toInt().toFloat(), sex) };
+      case (null, ?age) { bmrBySex(weightKg, heightCm, age.toInt().toFloat(), #male) };
+      case (?sex, null) { bmrBySex(weightKg, heightCm, 35, sex) };
+      case (null, null) { bmrBySex(weightKg, heightCm, 35, #male) };
+    };
+  };
+
+  func bmrBySex(weightKg : Float, heightCm : Float, age : Float, sex : Sex) : Float {
+    let standardBMR = 10.0 * weightKg + 6.25 * heightCm - 5.0 * age;
+    switch (sex) {
+      case (#male) { standardBMR + 5.0 };
+      case (#female) { standardBMR - 161.0 };
+    };
+  };
+
+  func calculateTDEE(bmr : Float, activity : ActivityLevel) : Float {
+    switch (activity) {
+      case (#sedentary) { bmr * 1.2 };
+      case (#lightlyActive) { bmr * 1.375 };
+      case (#moderatelyActive) { bmr * 1.55 };
+      case (#veryActive) { bmr * 1.725 };
+      case (#extraActive) { bmr * 1.9 };
+    };
   };
 
   public shared ({ caller }) func updateBodyGoal(details : BodyGoalDetails) : async () {

@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useGetFoodEntries } from '../hooks/useFoodEntries';
 import { useGetCallerUserProfile } from '../hooks/useCurrentUserProfile';
+import { useGetCallerHealthMetrics } from '../hooks/useCallerHealthMetrics';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Plus, TrendingUp, Camera, Target, TrendingDown, Activity } from 'lucide-react';
@@ -12,6 +13,7 @@ import CaloriesOverTimeChart from '../components/graphs/CaloriesOverTimeChart';
 import MacroDistributionChart from '../components/graphs/MacroDistributionChart';
 import NutritionBalanceRating from '../components/graphs/NutritionBalanceRating';
 import WeeklySummaryCard from '../components/graphs/WeeklySummaryCard';
+import MaintenanceCaloriesCard from '../components/dashboard/MaintenanceCaloriesCard';
 import { calculateWeeklySummary } from '../utils/weeklyFeedback';
 import { GoalType } from '@/backend';
 
@@ -58,6 +60,7 @@ export default function DashboardPage() {
   const [rangeEnd, setRangeEnd] = useState<number>(today);
 
   const { data: userProfile } = useGetCallerUserProfile();
+  const { data: healthMetrics } = useGetCallerHealthMetrics();
   const { data: todayEntries = [], isLoading: todayLoading } = useGetFoodEntries(today, today);
   const { data: rangeEntries = [], isLoading: rangeLoading } = useGetFoodEntries(rangeStart, rangeEnd);
   const { data: selectedDayEntries = [] } = useGetFoodEntries(selectedDay, selectedDay);
@@ -110,6 +113,13 @@ export default function DashboardPage() {
           </Button>
         </div>
       </div>
+
+      {/* Maintenance Calories Card */}
+      <MaintenanceCaloriesCard
+        healthMetrics={healthMetrics ?? null}
+        todayCalories={todayTotals.calories}
+        userProfile={userProfile ?? null}
+      />
 
       {bodyGoal && (
         <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">

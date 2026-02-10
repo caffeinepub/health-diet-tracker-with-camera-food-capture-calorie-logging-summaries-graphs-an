@@ -1,97 +1,106 @@
 import Map "mo:core/Map";
+import Float "mo:core/Float";
 import Nat "mo:core/Nat";
 import Principal "mo:core/Principal";
 
 module {
-  // Old FoodEntry without description field
-  type OldFoodEntry = {
-    id : Nat;
-    owner : Principal.Principal;
-    day : Int;
-    foodLabel : Text;
-    calories : Float;
-    macros : {
-      protein : Float;
-      carbs : Float;
-      fat : Float;
-    };
-    micronutrients : {
-      fiber : Float;
-      sodium : Float;
-      sugar : Float;
-    };
-    portionSize : Float;
-    confidenceLevel : Float;
+  public type OldActor = {
+    userProfiles : Map.Map<Principal, OldUserProfile>;
   };
 
-  // Old Actor State
-  type OldActor = {
-    userProfiles : Map.Map<Principal.Principal, {
-      name : Text;
-      bodyGoal : ?{
-        goalType : {
-          #loseWeight;
-          #gainWeight;
-          #gainMuscle;
-          #maintain;
-        };
-        currentWeight : Float;
-        targetWeight : Float;
-        weeklyGoalSpeed : Float;
-      };
-    }>;
-    nextEntryId : Nat;
-    foodEntries : Map.Map<Nat, OldFoodEntry>;
+  type OldUserProfile = {
+    name : Text;
+    bodyGoal : ?OldBodyGoalDetails;
   };
 
-  // New Actor State (from main.mo)
-  type NewActor = {
-    userProfiles : Map.Map<Principal.Principal, {
-      name : Text;
-      bodyGoal : ?{
-        goalType : {
-          #loseWeight;
-          #gainWeight;
-          #gainMuscle;
-          #maintain;
-        };
-        currentWeight : Float;
-        targetWeight : Float;
-        weeklyGoalSpeed : Float;
-      };
-    }>;
-    nextEntryId : Nat;
-    foodEntries : Map.Map<Nat, {
-      id : Nat;
-      owner : Principal.Principal;
-      day : Int;
-      foodLabel : Text;
-      description : Text;
-      calories : Float;
-      macros : {
-        protein : Float;
-        carbs : Float;
-        fat : Float;
-      };
-      micronutrients : {
-        fiber : Float;
-        sodium : Float;
-        sugar : Float;
-      };
-      portionSize : Float;
-      confidenceLevel : Float;
-    }>;
+  type OldBodyGoalDetails = {
+    goalType : OldGoalType;
+    currentWeight : Float;
+    targetWeight : Float;
+    weeklyGoalSpeed : Float;
+  };
+
+  type OldGoalType = {
+    #loseWeight;
+    #gainWeight;
+    #gainMuscle;
+    #maintain;
+  };
+
+  public type NewActor = {
+    userProfiles : Map.Map<Principal, NewUserProfile>;
+  };
+
+  type NewUserProfile = {
+    name : Text;
+    heightCm : ?Float;
+    age : ?Nat;
+    sex : ?NewSex;
+    activityLevel : ?NewActivityLevel;
+    bodyGoal : ?NewBodyGoalDetails;
+  };
+
+  type NewSex = { #male; #female };
+  type NewActivityLevel = {
+    #sedentary;
+    #lightlyActive;
+    #moderatelyActive;
+    #veryActive;
+    #extraActive;
+  };
+
+  type NewBodyGoalDetails = {
+    goalType : NewGoalType;
+    currentWeight : Float;
+    targetWeight : Float;
+    weeklyGoalSpeed : Float;
+  };
+
+  type NewGoalType = {
+    #loseWeight;
+    #gainWeight;
+    #gainMuscle;
+    #maintain;
   };
 
   public func run(old : OldActor) : NewActor {
-    let newFoodEntries = old.foodEntries.map<Nat, OldFoodEntry, { id : Nat; owner : Principal.Principal; day : Int; foodLabel : Text; description : Text; calories : Float; macros : { protein : Float; carbs : Float; fat : Float }; micronutrients : { fiber : Float; sodium : Float; sugar : Float }; portionSize : Float; confidenceLevel : Float }>(
-      func(_id, oldEntry) {
-        { oldEntry with description = "" };
-      }
+    let newUserProfiles = old.userProfiles.map<Principal, OldUserProfile, NewUserProfile>(
+      func(_principal, oldProfile) { convertUserProfile(oldProfile) }
     );
+    { userProfiles = newUserProfiles };
+  };
+
+  func convertUserProfile(old : OldUserProfile) : NewUserProfile {
     {
-      old with
-      foodEntries = newFoodEntries;
+      name = old.name;
+      heightCm = null;
+      age = null;
+      sex = null;
+      activityLevel = null;
+      bodyGoal = convertBodyGoalDetails(old.bodyGoal);
+    };
+  };
+
+  func convertBodyGoalDetails(old : ?OldBodyGoalDetails) : ?NewBodyGoalDetails {
+    switch (old) {
+      case (null) { null };
+      case (?oldDetails) {
+        ?{
+          goalType = convertGoalType(oldDetails.goalType);
+          currentWeight = oldDetails.currentWeight;
+          targetWeight = oldDetails.targetWeight;
+          weeklyGoalSpeed = oldDetails.weeklyGoalSpeed;
+        };
+      };
+    };
+  };
+
+  func convertGoalType(old : OldGoalType) : NewGoalType {
+    switch (old) {
+      case (#loseWeight) { #loseWeight };
+      case (#gainWeight) { #gainWeight };
+      case (#gainMuscle) { #gainMuscle };
+      case (#maintain) { #maintain };
     };
   };
 };

@@ -18,10 +18,10 @@ export default function AppLayout({ children }: AppLayoutProps) {
         <footer className="border-t mt-16">
           <div className="container mx-auto px-4 py-6 text-center text-sm text-muted-foreground">
             <p>
-              © {new Date().getFullYear()} NutriScan. Built with love using{' '}
+              © {new Date().getFullYear()} Calorieshivam. Built with love using{' '}
               <a
                 href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(
-                  typeof window !== 'undefined' ? window.location.hostname : 'nutriscan-app'
+                  typeof window !== 'undefined' ? window.location.hostname : 'calorieshivam-app'
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"

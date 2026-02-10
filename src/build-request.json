@@ -1,119 +1,114 @@
 {
   "kind": "build_request",
-  "title": "Add speech-to-text in scan confirmation and automatic weekly summary feedback",
+  "title": "Add BMI + maintenance calories (TDEE) per user and rename app to Calorieshivam",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-20",
-      "text": "Add an optional speech-to-text (voice dictation) input in the food scanning flow so the user can speak a meal description, have it converted into text, and then manually edit it before saving the scanned entry.",
-      "target": "frontend",
+      "id": "REQ-36",
+      "text": "Extend the per-user profile data model to store the additional fields required to compute BMI and maintenance calories (TDEE), including at minimum: height, age, sex, and activity level, while preserving existing fields (name, bodyGoal) and keeping data isolated per Internet Identity principal.",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-4",
-          "msg-8",
-          "msg-10"
+          "msg-1"
         ],
         "quotes": [
-          "User speaks",
-          "User will edit",
-          "Specifically in food scanning"
+          "add bmi and other things also a maintenance calorie for every user should be provided by their height weight age and everything the login data"
         ]
       },
       "acceptanceCriteria": [
-        "In the scan confirmation step (the page that currently shows “Confirm Food Details”), there is a clear control (e.g., a microphone button) to start/stop dictation.",
-        "Dictation converts the user’s spoken words into text in a visible editable text field.",
-        "The user can edit the transcribed text before saving.",
-        "If the browser/device does not support speech recognition or permission is denied, the UI shows an English message explaining the issue and still allows manual typing without blocking the flow."
+        "The backend UserProfile type includes new fields sufficient to compute BMI and TDEE (height, age, sex, activity level) without removing existing fields.",
+        "Existing profile save/load endpoints continue to work for users who already have a stored profile (new fields are optional or have safe defaults).",
+        "All profile reads/writes remain authorized and scoped to the caller principal as before."
       ]
     },
     {
-      "id": "REQ-21",
-      "text": "Persist the spoken/edited meal description from the scan confirmation step into the saved food entry’s label/description so the spoken summary is stored and visible in existing entry lists/details.",
+      "id": "REQ-37",
+      "text": "Add backend logic to compute BMI and maintenance calories (TDEE) deterministically from the caller’s stored profile data, and expose it via a dedicated query API that the frontend can call (e.g., `getCallerHealthMetrics`). Include computed values at minimum: BMI, BMI category label, BMR, and TDEE (maintenance calories).",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "a maintenance calorie for every user should be provided by their height weight age and everything the login data"
+        ]
+      },
+      "acceptanceCriteria": [
+        "A new backend query returns computed health metrics for the authenticated caller based on stored profile fields.",
+        "If required profile inputs are missing, the backend query returns a structured response indicating what’s missing (and does not trap).",
+        "No external APIs/services are used; computations are fully local and deterministic."
+      ]
+    },
+    {
+      "id": "REQ-38",
+      "text": "Update the post-login profile setup flow to collect the additional profile fields needed for BMI and maintenance calorie calculation (height, age, sex, activity level) and persist them to the backend as part of the caller’s profile.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "provided by their height weight age and everything the login data"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The profile setup UI includes inputs for height, age, sex, and activity level in addition to the existing name/body-goal fields.",
+        "Form validation prevents saving clearly invalid values (e.g., non-positive height/age).",
+        "Submitting the setup form persists the new fields along with the existing profile fields via the existing profile-save hook.",
+        "All user-facing text in the profile setup dialog is in English and does not reference old app names (e.g., remove/replace the existing “Welcome to NutriScan!” text)."
+      ]
+    },
+    {
+      "id": "REQ-39",
+      "text": "Add a persistent “Maintenance Calories” area on the Dashboard that is visible whenever the user is logged in and shows: (1) the user’s maintenance calories (TDEE), (2) today’s consumed calories, (3) whether today is above/below/equal to maintenance (with the numeric difference), and (4) the user’s BMI with a simple category label. If the profile is missing required inputs, show an English prompt telling the user which profile fields are needed.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "provide a maintain maintenance calorie area at the dashboard available all the time by the login data"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Dashboard shows a clearly visible card/section with TDEE (maintenance calories) and BMI for logged-in users.",
+        "The section indicates Above/Below/At maintenance based on today’s total calories vs TDEE, including the difference in kcal.",
+        "If the user profile lacks required fields for calculation, the section renders an English call-to-action message instead of broken/blank values.",
+        "The section updates correctly as today’s entries change (reactive to existing today totals)."
+      ]
+    },
+    {
+      "id": "REQ-40",
+      "text": "Rename the app/website user-facing name to “Calorieshivam” across the web app and Android wrapper, updating all visible branding strings (header brand label, login page title, image alt text, footer copyright, browser tab title) and Android wrapper user-facing name and documentation headings. Keep technical identifiers (e.g., Android package name, variable/resource keys like `nutriscan_base_url`) unchanged unless strictly necessary for build correctness.",
       "target": "both",
       "source": {
         "messageIds": [
-          "msg-3"
+          "msg-1"
         ],
         "quotes": [
-          "there should be a voice option also that I made approx 100 gm oats in this milk and for 5 minutes ... this will be easy than writing"
+          "Change the app or website name to calorieshivam."
         ]
       },
       "acceptanceCriteria": [
-        "When saving an entry from the scan flow, the saved entry reflects the user’s edited dictated description (not only the auto-detected food name).",
-        "The stored description is visible wherever the app currently displays the entry label/details (e.g., today’s entries list and entry details dialog).",
-        "No existing manual-entry flow is broken by this change."
-      ]
-    },
-    {
-      "id": "REQ-22",
-      "text": "Add an automatic weekly (last 7 days) summary section that generates goal-aligned feedback, including macro/nutrition suggestions and a 1–10 rating with a congratulatory message when the user is on track.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-3",
-          "msg-6",
-          "msg-7"
-        ],
-        "quotes": [
-          "there should be an opinion or like a summary type after every week",
-          "Automatically",
-          "Automatic"
-        ]
-      },
-      "acceptanceCriteria": [
-        "The Dashboard includes a “Weekly Summary (Last 7 Days)” section that appears without the user needing to manually trigger generation.",
-        "The weekly summary displays: (1) last-7-days totals/averages (at minimum calories and macros), (2) a numeric score from 1 to 10, and (3) a short English feedback message.",
-        "When the score indicates the user is doing well, the summary shows an English congratulatory message.",
-        "If there is insufficient data (e.g., no entries in the last 7 days), the section shows an English empty/insufficient-data state rather than failing silently."
-      ]
-    },
-    {
-      "id": "REQ-23",
-      "text": "Make the weekly rating visually engaging by rendering a 1–10 score as a clear rating visualization (e.g., stars or a segmented scale) consistent with the existing UI style.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-3"
-        ],
-        "quotes": [
-          "you will give 5 stars, 5 out of 5 sorry 10 out of 10 there should be a score type rating 10 out of 10"
-        ]
-      },
-      "acceptanceCriteria": [
-        "The weekly summary shows a visual rating element that clearly communicates the 1–10 score at a glance.",
-        "The rating visualization and weekly summary card use existing Tailwind/Shadcn styling patterns used elsewhere in the app.",
-        "All user-facing labels in the weekly summary are in English."
-      ]
-    },
-    {
-      "id": "REQ-24",
-      "text": "Generate weekly feedback using fully local, deterministic rules (no external calls), leveraging the user’s stored body goal (if available) and the logged macros/calories for the last 7 days.",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-3"
-        ],
-        "quotes": [
-          "you should give him or her suggestion AI suggestion ... according to his or her diet"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Weekly feedback generation does not call any external services/APIs.",
-        "If the user has a body goal configured, the weekly feedback references it (e.g., “Lose Weight”, “Gain Muscle”) in English.",
-        "The app produces at least one concrete suggestion when the score is not high (e.g., suggest increasing protein if protein share is low), based only on logged data and simple rules.",
-        "The feature works per-user (no data leakage across principals)."
+        "Web app header brand text displays “Calorieshivam”.",
+        "Login page displays “Calorieshivam” and any logo alt text reflects the new name.",
+        "Browser tab title in `frontend/index.html` uses “Calorieshivam” and keeps the rest of the title text in English.",
+        "Footer text no longer references “Calorieman” and uses “Calorieshivam”.",
+        "Android wrapper `app_name` string is “Calorieshivam” and wrapper README heading/content references “Calorieshivam” where it is a user-facing app name.",
+        "No required build changes rename technical identifiers like the Android package (`com/nutriscan/wrapper`) unless needed to compile."
       ]
     }
   ],
   "constraints": [
-    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or anything under frontend/src/components/ui (compose these components instead).",
-    "Use only local/on-device capabilities for voice input (browser speech recognition) and weekly feedback; do not add any external AI/LLM calls.",
-    "Respect the single-actor Motoko backend architecture (all logic in backend/main.mo); add backend state migration only if the persisted data model changes."
+    "Backend must remain a single Motoko actor with all logic in backend/main.mo; add migration.mo only if an upgrade-safe state migration is actually required.",
+    "Do not edit files under frontend/src/components/ui (read-only shadcn components); compose them instead.",
+    "Do not edit immutable hook/entry files listed in SYSTEM_CONTEXT (e.g., frontend/src/hooks/useInternetIdentity.ts(x), frontend/src/hooks/useActor.ts, frontend/src/main.tsx).",
+    "Use English for all user-facing UI strings."
   ],
   "nonGoals": [
-    "Do not implement voice control/commands that automatically parse ingredients and quantities into structured nutrients (voice is for dictation into an editable summary only).",
-    "Do not add real-time chat, WebSockets, push notifications, or any external messaging/voice services.",
-    "Do not redesign the existing scan capture flow beyond adding the optional dictation + weekly summary UI."
+    "Adding external health APIs or third-party services for BMI/TDEE computation.",
+    "Adding paid features, subscriptions, or notifications.",
+    "Changing Android package name / applicationId or canister IDs as part of the rename."
   ],
   "imageRequirements": {
     "required": [],

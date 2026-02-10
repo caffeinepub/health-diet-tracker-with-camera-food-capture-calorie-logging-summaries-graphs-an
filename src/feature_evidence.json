@@ -2,11 +2,11 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-an-optional-speech-to-text-voice-dictation-input-in-the-food-scanning-flow-so-the-user-can-speak-a-meal-description-have-it-converted-into-text-and-then-manually-edit-it-before-saving-the-scanned-entry",
-      "featureTitle": "Add an optional speech-to-text (voice dictation) input in the food scanning flow so the user can speak a meal description, have it converted into text, and then manually edit it before saving the scanned entry.",
+      "featureId": "feature-update-the-post-login-profile-setup-flow-to-collect-the-additional-profile-fields-needed-for-bmi-and-maintenance-calorie-calculation-height-age-sex-activity-level-and-persist-them-to-the-backend-as-part-of-the-caller-s-profile",
+      "featureTitle": "Update the post-login profile setup flow to collect the additional profile fields needed for BMI and maintenance calorie calculation (height, age, sex, activity level) and persist them to the backend as part of the caller’s profile.",
       "files": [
-        "frontend/src/components/entries/EstimationConfirmationStep.tsx",
-        "frontend/src/hooks/useSpeechToText.ts"
+        "frontend/src/App.tsx",
+        "frontend/src/components/auth/ProfileSetupDialog.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -18,19 +18,17 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-20"
+        "REQ-38"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-persist-the-spoken-edited-meal-description-from-the-scan-confirmation-step-into-the-saved-food-entry-s-label-description-so-the-spoken-summary-is-stored-and-visible-in-existing-entry-lists-details",
-      "featureTitle": "Persist the spoken/edited meal description from the scan confirmation step into the saved food entry’s label/description so the spoken summary is stored and visible in existing entry lists/details.",
+      "featureId": "feature-add-a-persistent-maintenance-calories-area-on-the-dashboard-that-is-visible-whenever-the-user-is-logged-in-and-shows-1-the-user-s-maintenance-calories-tdee-2-today-s-consumed-calories-3-whether-today-is-above-below-equal-to-maintenance-with-the-numeric-difference-and-4-the-user-s-bmi-with-a-simple-category-label-if-the-profile-is-missing-required-inputs-show-an-english-prompt-telling-the-user-which-profile-fields-are-needed",
+      "featureTitle": "Add a persistent “Maintenance Calories” area on the Dashboard that is visible whenever the user is logged in and shows: (1) the user’s maintenance calories (TDEE), (2) today’s consumed calories, (3) whether today is above/below/equal to maintenance (with the numeric difference), and (4) the user’s BMI with a simple category label. If the profile is missing required inputs, show an English prompt telling the user which profile fields are needed.",
       "files": [
-        "frontend/src/components/entries/EntryDetailsDialog.tsx",
-        "frontend/src/components/entries/EstimationConfirmationStep.tsx",
-        "frontend/src/components/entries/TodayEntriesList.tsx",
-        "frontend/src/hooks/useFoodEntries.ts",
-        "frontend/src/pages/AddEntryPage.tsx"
+        "frontend/src/components/dashboard/MaintenanceCaloriesCard.tsx",
+        "frontend/src/hooks/useCallerHealthMetrics.ts",
+        "frontend/src/pages/DashboardPage.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -42,17 +40,21 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-21"
+        "REQ-39"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-add-an-automatic-weekly-last-7-days-summary-section-that-generates-goal-aligned-feedback-including-macro-nutrition-suggestions-and-a-1-10-rating-with-a-congratulatory-message-when-the-user-is-on-track",
-      "featureTitle": "Add an automatic weekly (last 7 days) summary section that generates goal-aligned feedback, including macro/nutrition suggestions and a 1–10 rating with a congratulatory message when the user is on track.",
+      "featureId": "feature-rename-the-app-website-user-facing-name-to-calorieshivam-across-the-web-app-and-android-wrapper-updating-all-visible-branding-strings-header-brand-label-login-page-title-image-alt-text-footer-copyright-browser-tab-title-and-android-wrapper-user-facing-name-and-documentation-headings-keep-technical-identifiers-e-g-android-package-name-variable-resource-keys-like-nutriscan-base-url-unchanged-unless-strictly-necessary-for-build-correctness",
+      "featureTitle": "Rename the app/website user-facing name to “Calorieshivam” across the web app and Android wrapper, updating all visible branding strings (header brand label, login page title, image alt text, footer copyright, browser tab title) and Android wrapper user-facing name and documentation headings. Keep technical identifiers (e.g., Android package name, variable/resource keys like `nutriscan_base_url`) unchanged unless strictly necessary for build correctness.",
       "files": [
-        "frontend/src/components/graphs/WeeklySummaryCard.tsx",
-        "frontend/src/pages/DashboardPage.tsx",
-        "frontend/src/utils/weeklyFeedback.ts"
+        "frontend/android-wrapper/README.md",
+        "frontend/android-wrapper/app/src/main/res/values/strings.xml",
+        "frontend/android-wrapper/settings.gradle",
+        "frontend/index.html",
+        "frontend/src/components/layout/AppHeader.tsx",
+        "frontend/src/components/layout/AppLayout.tsx",
+        "frontend/src/pages/LoginPage.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -64,50 +66,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-22"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-make-the-weekly-rating-visually-engaging-by-rendering-a-1-10-score-as-a-clear-rating-visualization-e-g-stars-or-a-segmented-scale-consistent-with-the-existing-ui-style",
-      "featureTitle": "Make the weekly rating visually engaging by rendering a 1–10 score as a clear rating visualization (e.g., stars or a segmented scale) consistent with the existing UI style.",
-      "files": [
-        "frontend/src/components/graphs/WeeklyRatingScale.tsx",
-        "frontend/src/components/graphs/WeeklySummaryCard.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "camera@1.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-23"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-generate-weekly-feedback-using-fully-local-deterministic-rules-no-external-calls-leveraging-the-user-s-stored-body-goal-if-available-and-the-logged-macros-calories-for-the-last-7-days",
-      "featureTitle": "Generate weekly feedback using fully local, deterministic rules (no external calls), leveraging the user’s stored body goal (if available) and the logged macros/calories for the last 7 days.",
-      "files": [
-        "frontend/src/components/graphs/WeeklySummaryCard.tsx",
-        "frontend/src/pages/DashboardPage.tsx",
-        "frontend/src/utils/weeklyFeedback.ts"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "camera@1.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-24"
+        "REQ-40"
       ],
       "confidence": "high"
     }

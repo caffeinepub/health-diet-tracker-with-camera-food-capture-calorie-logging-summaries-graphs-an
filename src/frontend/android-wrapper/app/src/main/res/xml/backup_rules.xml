@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!-- Exclude WebView data from backup -->
+    <exclude domain="sharedpref" path="WebViewChromiumPrefs.xml" />
+    <exclude domain="database" path="webview.db" />
+    <exclude domain="database" path="webviewCache.db" />
+</full-backup-content>

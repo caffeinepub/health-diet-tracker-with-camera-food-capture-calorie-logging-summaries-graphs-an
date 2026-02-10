@@ -61,9 +61,13 @@ function AuthGate({ children }: { children: React.ReactNode }) {
 
   const isAuthenticated = !!identity;
   
-  // Check if profile is complete (has name and bodyGoal with all required fields)
+  // Check if profile is complete (has name, bodyGoal, and all health metrics fields)
   const isProfileComplete = userProfile && 
     userProfile.name && 
+    userProfile.heightCm !== undefined &&
+    userProfile.age !== undefined &&
+    userProfile.sex !== undefined &&
+    userProfile.activityLevel !== undefined &&
     userProfile.bodyGoal &&
     userProfile.bodyGoal.goalType &&
     userProfile.bodyGoal.currentWeight > 0 &&
@@ -74,7 +78,7 @@ function AuthGate({ children }: { children: React.ReactNode }) {
 
   if (isInitializing) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
           <p className="text-muted-foreground">Loading...</p>
@@ -87,7 +91,6 @@ function AuthGate({ children }: { children: React.ReactNode }) {
     return <LoginPage />;
   }
 
-  // Block app access until profile is complete
   if (showProfileSetup) {
     return <ProfileSetupDialog />;
   }

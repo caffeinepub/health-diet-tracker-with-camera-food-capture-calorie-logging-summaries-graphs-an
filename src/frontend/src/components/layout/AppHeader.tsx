@@ -20,11 +20,11 @@ export default function AppHeader() {
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
                 <img 
                   src="/assets/generated/app-logo-s.dim_512x512.png" 
-                  alt="NutriScan Logo"
+                  alt="Calorieshivam Logo"
                   className="w-full h-full object-cover"
                 />
               </div>
-              <span className="text-xl font-bold">NutriScan</span>
+              <span className="text-xl font-bold">Calorieshivam</span>
             </button>
 
             <nav className="hidden md:flex items-center gap-2">
