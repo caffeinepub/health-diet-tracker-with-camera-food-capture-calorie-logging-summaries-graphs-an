@@ -1,0 +1,305 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Health & Diet Tracker (Frontend): II auth, dashboard logging, camera capture, graphs, helper chat, theme, and generated assets",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "summary": "Internet Identity sign-in/out flow with per-user (principal-scoped) access to diet entries and first-login profile setup UI.",
+      "acceptanceCriteria": [
+        "Users can sign in/out with Internet Identity.",
+        "Creating diet entries while signed in associates entries with the caller principal.",
+        "A user cannot see another user’s entries when using a different principal."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "create",
+          "description": "Create the app shell with route wiring and an auth gate that requires Internet Identity before showing any personal diet data (redirect/guard to sign-in + profile setup when needed)."
+        },
+        {
+          "path": "frontend/src/components/auth/LoginButton.tsx",
+          "operation": "create",
+          "description": "Create a Login/Logout button using the selected authorization component’s Internet Identity flow (useInternetIdentity), clearing React Query cache on logout. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/auth/ProfileSetupDialog.tsx",
+          "operation": "create",
+          "description": "Create a first-login profile setup dialog (ask for a display name) that uses authorization component guidance to prevent modal flash (query enabled only after actor is ready) and avoids showing principal IDs. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/hooks/useCurrentUserProfile.ts",
+          "operation": "create",
+          "description": "Add React Query hooks for getCallerUserProfile/saveCallerUserProfile and role helpers (getCallerUserRole/isCallerAdmin) to support authenticated UX and graceful unauthorized handling."
+        },
+        {
+          "path": "frontend/src/components/layout/AppHeader.tsx",
+          "operation": "create",
+          "description": "Create a header that shows the app name/logo, signed-in user display name (from profile), and LoginButton; include navigation links to Dashboard, Add Entry, Camera Capture, and Helper Chat."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Daily Dashboard page with today totals, today entries list, and selectable date-range calorie totals with React Query refetch/invalidation.",
+      "acceptanceCriteria": [
+        "Dashboard shows today’s total calories computed from today’s entries.",
+        "Dashboard includes a date picker or range selector to compute totals for a selected period.",
+        "Users can add a new entry and see the totals update without a full page reload (React Query invalidation/refetch)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/DashboardPage.tsx",
+          "operation": "create",
+          "description": "Implement the Daily Dashboard page: show today's total calories, list of today's entries, and a date range selector that recomputes totals based on entries fetched for the selected range."
+        },
+        {
+          "path": "frontend/src/hooks/useFoodEntries.ts",
+          "operation": "create",
+          "description": "Add React Query hooks to fetch entries for the signed-in user via backend capability getFoodEntriesForCaller(startDay,endDay) and compute client-side totals for today/range."
+        },
+        {
+          "path": "frontend/src/components/entries/TodayEntriesList.tsx",
+          "operation": "create",
+          "description": "Create a presentational list component for today’s foods showing label, calories, macros, portion multiplier, and confidence level (read-only display)."
+        },
+        {
+          "path": "frontend/src/components/entries/DateRangePicker.tsx",
+          "operation": "create",
+          "description": "Create a simple date and range selector UI (e.g., start/end day) to drive dashboard summary and graphs."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Wire the Dashboard route into the router and main navigation so it is reachable within 1–2 clicks from the header."
+        },
+        {
+          "path": "frontend/src/pages/AddEntryPage.tsx",
+          "operation": "create",
+          "description": "Create an Add Entry page (manual entry) that submits to backend capability addFoodEntry(...) and triggers React Query invalidation so the Dashboard updates without full page reload."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Interactive graphs and nutrition-balance rating visualization for calories over time and macro distribution, driven by logged entries and user-selected date/day.",
+      "acceptanceCriteria": [
+        "At least 2 graph types are present (e.g., line chart for calories over time; donut/bar for macros).",
+        "Graphs respond to user interaction (hover tooltips, day selection, or range selection).",
+        "A numeric/letter rating (e.g., A–F or 0–100) is shown with an explanation of how it is computed from macros, using clear English copy."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/graphs/CaloriesOverTimeChart.tsx",
+          "operation": "create",
+          "description": "Implement an interactive calories-over-time chart (daily aggregation) with hover tooltip and day selection that updates the selected day context for other widgets."
+        },
+        {
+          "path": "frontend/src/components/graphs/MacroDistributionChart.tsx",
+          "operation": "create",
+          "description": "Implement an interactive macro distribution chart (e.g., donut or stacked bar) for the selected day (or today) with hover tooltips showing grams and percentages."
+        },
+        {
+          "path": "frontend/src/components/graphs/NutritionBalanceRating.tsx",
+          "operation": "create",
+          "description": "Create a 'nutrition balance' rating visualization (A–F or 0–100) computed deterministically from logged macros, including clear English explanation text describing the formula and its limits."
+        },
+        {
+          "path": "frontend/src/pages/DashboardPage.tsx",
+          "operation": "modify",
+          "description": "Add the chart components to the Dashboard and connect them to the selected range/day state so graphs respond to user interaction and range changes."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Camera Capture flow (defaulting to back camera) with preview and an estimation/confirmation step before creating a food entry.",
+      "acceptanceCriteria": [
+        "On supported devices, the capture UI requests the environment/back camera by default.",
+        "User can capture an image and preview it before saving/using it.",
+        "After capture, the UI proceeds to an estimation/confirmation step rather than auto-logging silently."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/CameraCapturePage.tsx",
+          "operation": "create",
+          "description": "Create a camera capture page using the selected camera component hook useCamera configured to prefer facingMode 'environment'; show stable-sized preview, capture button, error states, and captured image preview. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/camera/CapturedPhotoPreview.tsx",
+          "operation": "create",
+          "description": "Create a preview step for the captured photo (client-side File), with actions to retake or proceed to estimation/confirmation."
+        },
+        {
+          "path": "frontend/src/components/entries/EstimationConfirmationStep.tsx",
+          "operation": "create",
+          "description": "Implement the post-capture estimation/confirmation UI: user enters food label and baseline calories/macros/micronutrients, then proceeds into the portion/confidence adjuster before saving."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Wire the Camera Capture route and navigation entry so it is reachable within 1–2 clicks from the main navigation."
+        },
+        {
+          "path": "frontend/public/assets/generated/scan-frame-overlay.dim_1080x1920.png",
+          "operation": "create",
+          "description": "Add the generated camera scanning frame overlay asset at the exact path frontend/public/assets/generated/scan-frame-overlay.dim_1080x1920.png and use it in the camera preview UI."
+        },
+        {
+          "path": "frontend/src/pages/CameraCapturePage.tsx",
+          "operation": "modify",
+          "description": "Render the static overlay image from frontend/public/assets/generated/scan-frame-overlay.dim_1080x1920.png on top of the live camera preview (no backend fetch)."
+        }
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "summary": "In-app deterministic 'AI-like' helper chat UI using curated knowledge base/rules with suggested prompts and citations (no external AI calls).",
+      "acceptanceCriteria": [
+        "Chat UI supports back-and-forth messages with timestamps and clear assistant/user styling.",
+        "Assistant answers are generated from a deterministic curated knowledge base and/or rules stored in the app/canister (no third-party AI service calls).",
+        "Chat includes suggested prompts (e.g., “What is a calorie deficit?”, “How much protein should I aim for?”) and shows a fallback message when it cannot answer."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/HelperChatPage.tsx",
+          "operation": "create",
+          "description": "Create the helper chat page with message list, timestamped bubbles, user input, and a deterministic response flow driven by curated suggestions (no external services)."
+        },
+        {
+          "path": "frontend/src/hooks/useChatKnowledgeBase.ts",
+          "operation": "create",
+          "description": "Add a hook that loads curated suggestions via backend capability getSuggestedQuestions(), provides deterministic matching/selection logic, and returns fallback responses when no answer is found."
+        },
+        {
+          "path": "frontend/src/components/chat/SuggestedPrompts.tsx",
+          "operation": "create",
+          "description": "Implement suggested prompt chips/buttons populated from curated suggestions to quickly insert/send common questions."
+        },
+        {
+          "path": "frontend/src/components/chat/ChatTranscript.tsx",
+          "operation": "create",
+          "description": "Create a transcript component rendering assistant/user styling and citations (display citations list under assistant answers)."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Wire the Helper Chat route and navigation entry so it is reachable within 1–2 clicks from the main navigation."
+        }
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "summary": "Confidence & Portion Adjuster step when creating entries (manual and camera flows) with live-updating calories/nutrients and saved confidence/portion values displayed in entry details.",
+      "acceptanceCriteria": [
+        "When creating an entry (including from camera capture), the user can adjust portion size (e.g., 0.5x–2.0x) and a confidence slider (e.g., Low/Medium/High).",
+        "Displayed calories/macros update immediately based on portion multiplier.",
+        "Saved entries persist both portion multiplier and confidence level and show them in the entry details."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/entries/PortionConfidenceAdjuster.tsx",
+          "operation": "create",
+          "description": "Create the 'Confidence & Portion Adjuster' UI control (portion multiplier + confidence level) that live-recomputes derived calories/macros/micronutrients in the UI."
+        },
+        {
+          "path": "frontend/src/hooks/usePortionAdjusterGuidance.ts",
+          "operation": "create",
+          "description": "Add a React Query hook to load in-app guidance copy via backend capability getPortionAdjusterGuidance() and display it near the adjuster for explainability."
+        },
+        {
+          "path": "frontend/src/pages/AddEntryPage.tsx",
+          "operation": "modify",
+          "description": "Integrate the adjuster step into manual entry creation so the saved entry includes portionSize and confidenceLevel and the displayed nutrition updates live before saving."
+        },
+        {
+          "path": "frontend/src/components/entries/EstimationConfirmationStep.tsx",
+          "operation": "modify",
+          "description": "Integrate the adjuster step into the camera-derived estimation flow so users confirm/adjust before saving, with live nutrition updates."
+        },
+        {
+          "path": "frontend/src/components/entries/EntryDetailsDialog.tsx",
+          "operation": "create",
+          "description": "Add an entry details UI showing portion multiplier and confidence level alongside calories/macros/micronutrients (read-only), used from the Dashboard list."
+        },
+        {
+          "path": "frontend/src/components/entries/TodayEntriesList.tsx",
+          "operation": "modify",
+          "description": "Wire entry click/tap to open EntryDetailsDialog so saved portion/confidence are visible in entry details."
+        }
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "summary": "Simple coherent visual theme across core flows (sign-in, dashboard, add entry, camera, chat) with non-blue/purple palette and consistent layout/typography.",
+      "acceptanceCriteria": [
+        "UI uses a consistent theme (e.g., warm neutrals + green accents) across navigation, cards, buttons, and charts.",
+        "Primary flows (sign-in, dashboard, add entry, camera capture, chat) are reachable within 1–2 clicks from the main navigation.",
+        "All user-facing text is in English."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/index.css",
+          "operation": "create",
+          "description": "Create global styles and CSS variables for a warm neutral + green accent theme (avoid blue/purple defaults), ensuring consistent typography, spacing, and backgrounds across the app."
+        },
+        {
+          "path": "frontend/tailwind.config.js",
+          "operation": "modify",
+          "description": "Adjust Tailwind theme tokens (via CSS variables already referenced) to align charts/cards/primary colors with the warm neutral + green accent palette."
+        },
+        {
+          "path": "frontend/src/components/layout/AppLayout.tsx",
+          "operation": "create",
+          "description": "Create a shared layout wrapper for consistent page padding, max width, card styling conventions, and responsive behavior across Dashboard/Add Entry/Camera/Chat."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Apply AppLayout/AppHeader consistently across routes so all primary flows remain reachable within 1–2 clicks and all copy remains in English."
+        }
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "summary": "Add generated static image assets under frontend/public/assets/generated and render them in the app header and empty states.",
+      "acceptanceCriteria": [
+        "Generated images exist in frontend/public/assets/generated with the exact filenames specified in imageRequirements.required.",
+        "At least the app header and one empty state use the generated images.",
+        "Images are loaded directly from static assets (not fetched from the backend)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/public/assets/generated/app-logo.dim_512x512.png",
+          "operation": "create",
+          "description": "Add the generated logo asset at the exact path frontend/public/assets/generated/app-logo.dim_512x512.png."
+        },
+        {
+          "path": "frontend/public/assets/generated/scan-hero.dim_1200x600.png",
+          "operation": "create",
+          "description": "Add the generated scan hero illustration at the exact path frontend/public/assets/generated/scan-hero.dim_1200x600.png."
+        },
+        {
+          "path": "frontend/public/assets/generated/empty-entries.dim_800x600.png",
+          "operation": "create",
+          "description": "Add the generated empty state illustration at the exact path frontend/public/assets/generated/empty-entries.dim_800x600.png."
+        },
+        {
+          "path": "frontend/src/components/layout/AppHeader.tsx",
+          "operation": "modify",
+          "description": "Render the static header logo using frontend/public/assets/generated/app-logo.dim_512x512.png (loaded as a static asset, not from backend)."
+        },
+        {
+          "path": "frontend/src/components/entries/EmptyEntriesState.tsx",
+          "operation": "create",
+          "description": "Create an empty state component for when there are no entries in the selected period, rendering frontend/public/assets/generated/empty-entries.dim_800x600.png and English guidance text."
+        },
+        {
+          "path": "frontend/src/pages/DashboardPage.tsx",
+          "operation": "modify",
+          "description": "Show EmptyEntriesState when the selected day/range has no entries, and optionally include the scan hero illustration frontend/public/assets/generated/scan-hero.dim_1200x600.png as a secondary illustration in a non-orphaned section."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,204 @@
+{
+  "kind": "build_request",
+  "title": "Health & diet tracker with camera food capture, calorie logging, summaries, graphs, and in-app helper chat",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Implement Internet Identity–based user flow so each signed-in user can create and view their own diet entries (no shared data across principals).",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "create an app about health it's about health and diet"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Users can sign in/out with Internet Identity.",
+        "Creating diet entries while signed in associates entries with the caller principal.",
+        "A user cannot see another user’s entries when using a different principal."
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Add a simple daily logging data model and persistence for food entries including: timestamp (day), food label/name, estimated calories, and basic nutrients (macros + a small set of micronutrients).",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "daily calorie readings",
+          "tell calories approx calories and basic nutritional values",
+          "basic macro-micronutrients"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Backend exposes CRUD methods needed by the UI to create and list entries.",
+        "Each entry stores calories and at least: protein, carbs, fat; and a small micronutrient set (e.g., fiber, sodium, sugar) as numeric fields.",
+        "Entries are persisted across page refresh and canister calls (stable storage)."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Create a Daily Dashboard page that shows: today’s total calories, a list of today’s logged foods, and an end-of-day (and selectable date range) total calorie summary.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "daily calorie readings",
+          "at last calories total calories summary"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Dashboard shows today’s total calories computed from today’s entries.",
+        "Dashboard includes a date picker or range selector to compute totals for a selected period.",
+        "Users can add a new entry and see the totals update without a full page reload (React Query invalidation/refetch)."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Add interactive graphs and rating-style visualizations for engagement, including: calories over time (daily), macro distribution (today or selected day), and a simple daily “nutrition balance” rating derived from logged macros.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "rating graphs",
+          "there should be graphs ratings",
+          "so that it seems engaging not one-sided it should be interactive app"
+        ]
+      },
+      "acceptanceCriteria": [
+        "At least 2 graph types are present (e.g., line chart for calories over time; donut/bar for macros).",
+        "Graphs respond to user interaction (hover tooltips, day selection, or range selection).",
+        "A numeric/letter rating (e.g., A–F or 0–100) is shown with an explanation of how it is computed from macros, using clear English copy."
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Implement a Camera Capture flow (preferring the device back camera when available) that lets users take a food photo and then create a log entry from it via an interactive estimation step.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "user will scan the food through camera back camera"
+        ]
+      },
+      "acceptanceCriteria": [
+        "On supported devices, the capture UI requests the environment/back camera by default.",
+        "User can capture an image and preview it before saving/using it.",
+        "After capture, the UI proceeds to an estimation/confirmation step rather than auto-logging silently."
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "text": "Provide an in-app “AI-like” chat helper experience for diet/nutrition confusion using an on-device/in-app rules + curated FAQ knowledge base (no external LLM calls), including suggested questions and citations to the app’s own guidance.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "there should be an AI to chat also if user has any confusion"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Chat UI supports back-and-forth messages with timestamps and clear assistant/user styling.",
+        "Assistant answers are generated from a deterministic curated knowledge base and/or rules stored in the app/canister (no third-party AI service calls).",
+        "Chat includes suggested prompts (e.g., “What is a calorie deficit?”, “How much protein should I aim for?”) and shows a fallback message when it cannot answer."
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "text": "Add at least one clearly defined “unique” differentiator feature that is not just logging/graphs/chat: implement a “Confidence & Portion Adjuster” step when creating an entry (user adjusts portion size and confidence; calories/nutrients update live and the app stores the confidence value).",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "it should have unique features unique other than any app present currently"
+        ]
+      },
+      "acceptanceCriteria": [
+        "When creating an entry (including from camera capture), the user can adjust portion size (e.g., 0.5x–2.0x) and a confidence slider (e.g., Low/Medium/High).",
+        "Displayed calories/macros update immediately based on portion multiplier.",
+        "Saved entries persist both portion multiplier and confidence level and show them in the entry details."
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "text": "Design a simple, easy UI with a coherent visual theme applied consistently across pages and components (colors, typography, spacing, and layout). Avoid a blue/purple default palette.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "it should have a easy and simple user interface"
+        ]
+      },
+      "acceptanceCriteria": [
+        "UI uses a consistent theme (e.g., warm neutrals + green accents) across navigation, cards, buttons, and charts.",
+        "Primary flows (sign-in, dashboard, add entry, camera capture, chat) are reachable within 1–2 clicks from the main navigation.",
+        "All user-facing text is in English."
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "text": "Add generated static image assets (logo + key illustrations) under frontend/public/assets/generated and render them in the UI (e.g., app header/logo and empty states).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "interactive app"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Generated images exist in frontend/public/assets/generated with the exact filenames specified in imageRequirements.required.",
+        "At least the app header and one empty state use the generated images.",
+        "Images are loaded directly from static assets (not fetched from the backend)."
+      ]
+    }
+  ],
+  "constraints": [
+    "Do not edit files under frontend/src/components/ui or any paths listed as immutable (compose them instead).",
+    "Backend must remain a single Motoko actor (all logic in the main actor).",
+    "Do not integrate third-party LLM/AI services (no OpenAI/Anthropic/etc.); the chat helper must be implemented via curated content/rules within the app.",
+    "Do not rely on external databases or third-party food nutrition APIs; any estimation must use in-app/canister-owned data and user confirmation."
+  ],
+  "nonGoals": [
+    "Exact calorie/nutrition recognition from images using a real ML model.",
+    "Medical diagnosis, treatment recommendations, or clinically validated nutrition planning.",
+    "Social features (followers, messaging, real-time chat) and push notifications."
+  ],
+  "imageRequirements": {
+    "required": [
+      "Minimal leaf + fork logo, flat vector style, warm neutral background (app-logo.dim_512x512.png)",
+      "Friendly food scanning illustration with phone outline and plate/food shapes, flat vector style (scan-hero.dim_1200x600.png)",
+      "Empty state illustration showing a simple bowl/plate and subtle graph elements, flat vector style (empty-entries.dim_800x600.png)",
+      "Camera scanning frame overlay graphic with corner brackets, transparent background (scan-frame-overlay.dim_1080x1920.png)"
+    ],
+    "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
+  }
+}
