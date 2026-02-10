@@ -49,6 +49,7 @@ export default function AddEntryPage() {
       await addEntry.mutateAsync({
         day: BigInt(getTodayDayNumber()),
         foodLabel: foodLabel.trim(),
+        description: '',
         calories,
         macros: { protein, carbs, fat },
         micronutrients: { fiber, sodium, sugar },
@@ -201,20 +202,36 @@ export default function AddEntryPage() {
               onPortionChange={setPortionSize}
               onConfidenceChange={setConfidenceLevel}
             />
+          </CardContent>
+        </Card>
 
-            <div className="mt-6 p-4 bg-accent/20 rounded-lg space-y-2">
-              <h4 className="font-semibold text-sm">Adjusted Nutrition</h4>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>Calories: <span className="font-semibold">{Math.round(adjustedCalories)} kcal</span></div>
-                <div>Protein: <span className="font-semibold">{adjustedProtein.toFixed(1)}g</span></div>
-                <div>Carbs: <span className="font-semibold">{adjustedCarbs.toFixed(1)}g</span></div>
-                <div>Fat: <span className="font-semibold">{adjustedFat.toFixed(1)}g</span></div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Adjusted Nutrition</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <span className="text-muted-foreground">Calories:</span>
+                <span className="ml-2 font-medium">{Math.round(adjustedCalories)} kcal</span>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Protein:</span>
+                <span className="ml-2 font-medium">{Math.round(adjustedProtein)}g</span>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Carbs:</span>
+                <span className="ml-2 font-medium">{Math.round(adjustedCarbs)}g</span>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Fat:</span>
+                <span className="ml-2 font-medium">{Math.round(adjustedFat)}g</span>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <div className="flex gap-4">
+        <div className="flex gap-3">
           <Button type="button" variant="outline" onClick={() => navigate({ to: '/' })} className="flex-1">
             Cancel
           </Button>

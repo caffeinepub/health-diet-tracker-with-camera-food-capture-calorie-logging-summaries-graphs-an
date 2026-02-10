@@ -1,16 +1,23 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 3,
-  "summary": "Health and diet tracking app featuring camera-based food scanning with AI calorie/nutrition estimation, daily calorie logging, summaries, graphs/ratings, and an AI chat assistant in a simple interactive UI.",
+  "projectStateVersion": 9,
+  "summary": "NutriScan health and diet tracking app with camera-based food scanning, daily calorie logging, summaries/graphs/ratings, in-app helper chat, local rules-based nutrition estimation with optional weight input, and a one-time body-goal onboarding (goal + current/target weight + weekly speed), using an aesthetic “S” logo across the app.",
   "architectural_notes": [
     "Requires device camera integration (back camera) for food scanning.",
     "AI/ML component needed for food recognition and nutrition estimation.",
     "Conversational AI component for in-app chat support.",
-    "Data model should support daily logs and aggregated summaries for charts."
+    "Data model should support daily logs and aggregated summaries for charts.",
+    "Branding assets update: replace existing logo with an aesthetic “S” across all UI surfaces (header/splash/empty states).",
+    "UX decision: place Scan action on main dashboard; tapping it opens camera immediately (no intermediate start screen).",
+    "Nutrition estimation must be fully local (no external AI/LLM calls), using a built-in Indian+global foods dataset and a 'similar food' fallback.",
+    "Add a one-time onboarding/profile setup for body goals capturing goal type, current weight, target weight, and weekly goal speed, stored per user.",
+    "Voice input: integrate on-device speech-to-text for meal description specifically within the food scanning flow; user can edit transcribed text before saving.",
+    "Weekly summary/score should be generated automatically from the user’s last-7-days logged entries using local rules/heuristics (no external AI/LLM calls), aligned with the user’s selected body goal."
   ],
-  "known_issues": [],
+  "known_issues": [
+    "Camera/food scanning flow not currently visible or accessible in the deployed draft UI (only manual add-entry is apparent)."
+  ],
   "isFixRequest": false,
-  "imageRequirements": "## Required Images\n- Minimal leaf + fork logo, flat vector style, warm neutral background (app-logo.dim_512x512.png)\n- Friendly food scanning illustration with phone outline and plate/food shapes, flat vector style (scan-hero.dim_1200x600.png)\n- Empty state illustration showing a simple bowl/plate and subtle graph elements, flat vector style (empty-entries.dim_800x600.png)\n- Camera scanning frame overlay graphic with corner brackets, transparent background (scan-frame-overlay.dim_1080x1920.png)",
   "existing_features": [
     {
       "id": "feature-implement-internet-identity-based-user-flow-so-each-signed-in-user-can-create-and-view-their-own-diet-entries-no-shared-data-across-principals",
@@ -75,6 +82,118 @@
         "REQ-9"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-update-app-branding-to-use-an-aesthetic-s-logo-everywhere-the-app-currently-shows-the-nutriscan-logo-brand-mark-including-at-minimum-the-app-header-and-the-login-page",
+      "title": "Update app branding to use an aesthetic “S” logo everywhere the app currently shows the NutriScan logo/brand mark, including at minimum the App Header and the Login page.",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-clearly-visible-scan-food-entry-point-on-the-main-dashboard-page-next-to-the-existing-add-entry-primary-action-that-navigates-to-the-camera-capture-flow",
+      "title": "Add a clearly visible “Scan Food” entry point on the main Dashboard page (next to the existing “Add Entry” primary action) that navigates to the camera capture flow.",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-when-the-user-navigates-to-the-camera-capture-page-camera-start-the-camera-automatically-preferring-the-back-camera-without-requiring-the-user-to-press-a-start-camera-button",
+      "title": "When the user navigates to the camera capture page (/camera), start the camera automatically (preferring the back camera) without requiring the user to press a “Start Camera” button.",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-post-login-one-time-setup-ux-to-collect-all-required-profile-fields-including-name-plus-body-goal-onboarding-details-goal-type-current-weight-target-weight-weekly-goal-speed-and-block-access-to-the-app-until-the-setup-is-completed",
+      "title": "Update the post-login one-time setup UX to collect all required profile fields, including name plus body-goal onboarding details (goal type, current weight, target weight, weekly goal speed), and block access to the app until the setup is completed.",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-show-the-user-s-selected-body-goal-on-the-dashboard-page-after-onboarding-including-goal-type-and-a-compact-summary-of-current-vs-target-weight-and-weekly-goal-speed",
+      "title": "Show the user’s selected body goal on the Dashboard page after onboarding, including goal type and a compact summary of current vs target weight and weekly goal speed.",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-fully-local-no-external-calls-rules-based-nutrition-estimator-backed-by-a-preset-list-of-40-50-common-indian-global-foods-each-with-nutrition-per-100g-calories-protein-carbs-fat-and-the-existing-micronutrients-tracked-by-the-app",
+      "title": "Implement a fully local (no external calls) rules-based nutrition estimator backed by a preset list of ~40–50 common Indian + global foods, each with nutrition per 100g (calories, protein, carbs, fat; and the existing micronutrients tracked by the app).",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-camera-scan-estimation-flow-so-that-after-capture-the-app-auto-populates-food-label-and-nutrition-per-100g-from-the-local-estimator-and-the-user-only-needs-to-optionally-enter-the-food-weight-the-app-calculates-final-nutrition-automatically-from-weight",
+      "title": "Update the camera scan → estimation flow so that after capture, the app auto-populates food label and nutrition per 100g from the local estimator, and the user only needs to optionally enter the food weight; the app calculates final nutrition automatically from weight.",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-when-the-estimator-cannot-confidently-map-a-scan-to-a-known-food-provide-a-similar-food-fallback-by-presenting-a-short-list-of-the-closest-foods-from-the-preset-dataset-and-letting-the-user-pick-one-then-proceed-with-that-food-s-per-100g-nutrition",
+      "title": "When the estimator cannot confidently map a scan to a known food, provide a “similar food” fallback by presenting a short list of the closest foods from the preset dataset and letting the user pick one, then proceed with that food’s per-100g nutrition.",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-saved-food-entry-written-to-the-backend-reflects-the-calculated-final-nutrition-values-based-on-per-100g-optional-weight-then-portion-confidence-adjustments-without-requiring-the-user-to-manually-type-calories-macros",
+      "title": "Ensure the saved food entry written to the backend reflects the calculated final nutrition values (based on per-100g + optional weight, then portion/confidence adjustments), without requiring the user to manually type calories/macros.",
+      "reqIds": [
+        "REQ-19"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-an-optional-speech-to-text-voice-dictation-input-in-the-food-scanning-flow-so-the-user-can-speak-a-meal-description-have-it-converted-into-text-and-then-manually-edit-it-before-saving-the-scanned-entry",
+      "title": "Add an optional speech-to-text (voice dictation) input in the food scanning flow so the user can speak a meal description, have it converted into text, and then manually edit it before saving the scanned entry.",
+      "reqIds": [
+        "REQ-20"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-persist-the-spoken-edited-meal-description-from-the-scan-confirmation-step-into-the-saved-food-entry-s-label-description-so-the-spoken-summary-is-stored-and-visible-in-existing-entry-lists-details",
+      "title": "Persist the spoken/edited meal description from the scan confirmation step into the saved food entry’s label/description so the spoken summary is stored and visible in existing entry lists/details.",
+      "reqIds": [
+        "REQ-21"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-an-automatic-weekly-last-7-days-summary-section-that-generates-goal-aligned-feedback-including-macro-nutrition-suggestions-and-a-1-10-rating-with-a-congratulatory-message-when-the-user-is-on-track",
+      "title": "Add an automatic weekly (last 7 days) summary section that generates goal-aligned feedback, including macro/nutrition suggestions and a 1–10 rating with a congratulatory message when the user is on track.",
+      "reqIds": [
+        "REQ-22"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-make-the-weekly-rating-visually-engaging-by-rendering-a-1-10-score-as-a-clear-rating-visualization-e-g-stars-or-a-segmented-scale-consistent-with-the-existing-ui-style",
+      "title": "Make the weekly rating visually engaging by rendering a 1–10 score as a clear rating visualization (e.g., stars or a segmented scale) consistent with the existing UI style.",
+      "reqIds": [
+        "REQ-23"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-generate-weekly-feedback-using-fully-local-deterministic-rules-no-external-calls-leveraging-the-user-s-stored-body-goal-if-available-and-the-logged-macros-calories-for-the-last-7-days",
+      "title": "Generate weekly feedback using fully local, deterministic rules (no external calls), leveraging the user’s stored body goal (if available) and the logged macros/calories for the last 7 days.",
+      "reqIds": [
+        "REQ-24"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -115,10 +234,60 @@
         "REQ-2"
       ],
       "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Update branding: use an aesthetic “S” logo (for Shivam) everywhere in the app (replacing current logo in header/splash/empty states).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Make food scanning discoverable: add a Scan button on the main dashboard that opens the camera immediately.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Local rules-based food recognition + nutrition estimation from scanned images using a built-in Indian+global food list, with a 'similar food' fallback when unknown.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-11",
+      "summary": "Scan flow update: after prediction, show nutrition per-100g and allow optional user-entered food weight to compute final calories/macros automatically (minimize manual entry).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-12",
+      "summary": "One-time post-login body-goal onboarding: select goal type (lose/gain/muscle/maintain) and collect current weight, target weight, and weekly goal speed; persist and show on dashboard.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-13",
+      "summary": "Extend the user profile data model to persist one-time body-goal onboarding details: goal type (Lose Weight, Gain Weight, Gain Muscle, Maintain Weight & Muscle), current weight, target weight, and weekly goal speed.",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-14",
+      "summary": "Add optional speech-to-text voice input in the food scanning flow so users can speak a meal description, convert to text, then manually edit before saving.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-15",
+      "summary": "Add an automatic weekly (7-day) summary with goal-aligned feedback: macro/nutrition suggestions and a 1–10 score/rating with congratulatory messaging when on track.",
+      "reqIds": [],
+      "status": "pending"
     }
   ],
   "gameProjectType": "none",
-  "projectName": "Health & diet tracker with camera food capture, calorie logging, summaries, graphs, and in-app helper chat",
+  "projectName": "NutriScan",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

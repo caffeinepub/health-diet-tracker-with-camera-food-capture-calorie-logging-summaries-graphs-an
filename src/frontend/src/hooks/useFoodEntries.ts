@@ -23,6 +23,7 @@ export function useAddFoodEntry() {
     mutationFn: async (params: {
       day: bigint;
       foodLabel: string;
+      description?: string;
       calories: number;
       macros: { protein: number; carbs: number; fat: number };
       micronutrients: { fiber: number; sodium: number; sugar: number };
@@ -33,6 +34,7 @@ export function useAddFoodEntry() {
       return actor.addFoodEntry(
         params.day,
         params.foodLabel,
+        params.description || '',
         params.calories,
         params.macros,
         params.micronutrients,

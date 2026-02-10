@@ -1,16 +1,13 @@
 # Specification
 
 ## Summary
-**Goal:** Build a simple health & diet tracking app where signed-in users can log food (manually or via camera capture), see daily/range summaries and interactive graphs, and use an in-app helper chat based on curated guidance.
+**Goal:** Add optional voice dictation for meal descriptions during scan confirmation, and show an automatic weekly (last 7 days) nutrition summary with a visual 1–10 rating and deterministic, goal-aligned feedback.
 
 **Planned changes:**
-- Add Internet Identity sign-in/out and scope all diet data to the signed-in principal.
-- Implement a persistent food entry data model with timestamp/day, label, calories, macros (protein/carbs/fat), a small micronutrient set, plus portion multiplier and confidence value.
-- Create a Daily Dashboard showing today’s total calories, today’s entry list, and totals for a selectable date range; update UI via refetch/invalidation without full reload.
-- Add interactive visualizations: calories over time, macro distribution for a selected day, and a computed “nutrition balance” rating with a clear explanation.
-- Implement a camera capture flow that prefers the back camera, supports preview, and then routes into an estimation/confirmation step (not auto-log).
-- Add a deterministic in-app chat helper (no external LLM calls) backed by curated FAQ/rules, with suggested prompts, citations to app guidance, and a fallback response.
-- Apply a consistent, simple visual theme (avoiding blue/purple default palette) and ensure key flows are reachable from main navigation.
-- Add and render generated static assets (logo + illustrations) from `frontend/public/assets/generated` in the header and at least one empty state.
+- Add a microphone start/stop control on the scan confirmation (“Confirm Food Details”) step to dictate a meal description into an editable text field, with graceful fallback to manual typing when unsupported or permission is denied.
+- Persist the edited dictated description into the saved food entry so it appears anywhere entry label/details are shown (without breaking manual entry).
+- Add a Dashboard “Weekly Summary (Last 7 Days)” section that automatically displays last-7-days totals/averages (at minimum calories and macros), a 1–10 score, and an English feedback message, including an English congratulatory message when on track.
+- Render the 1–10 weekly score as a clear visual rating element consistent with existing Tailwind/Shadcn styling.
+- Implement fully local, deterministic weekly feedback rules (no external calls), referencing the user’s stored body goal when available and showing an English insufficient-data state when the last 7 days have too few/no entries.
 
-**User-visible outcome:** Users can sign in with Internet Identity, capture or manually log foods with calories/nutrients (including portion/confidence), view daily and date-range totals with interactive charts and a nutrition balance rating, and chat with an in-app helper that answers from built-in guidance.
+**User-visible outcome:** Users can speak a meal description during scan confirmation, edit it, and save it as the entry description; the Dashboard automatically shows a weekly summary card with macros/calories, a visual 1–10 rating, and simple goal-aware feedback or an insufficient-data message.

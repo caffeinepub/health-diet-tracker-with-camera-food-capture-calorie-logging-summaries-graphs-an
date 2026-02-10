@@ -1,6 +1,5 @@
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import { Button } from '@/components/ui/button';
-import { Leaf } from 'lucide-react';
 
 export default function LoginPage() {
   const { login, isLoggingIn } = useInternetIdentity();
@@ -9,8 +8,12 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-accent/5 p-4">
       <div className="max-w-md w-full space-y-8 text-center">
         <div className="flex justify-center">
-          <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center">
-            <Leaf className="w-12 h-12 text-primary" />
+          <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
+            <img 
+              src="/assets/generated/app-logo-s.dim_512x512.png" 
+              alt="NutriScan Logo"
+              className="w-full h-full object-cover"
+            />
           </div>
         </div>
         

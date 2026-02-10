@@ -1,194 +1,122 @@
 {
   "kind": "build_request",
-  "title": "Health & diet tracker with camera food capture, calorie logging, summaries, graphs, and in-app helper chat",
+  "title": "Add speech-to-text in scan confirmation and automatic weekly summary feedback",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-1",
-      "text": "Implement Internet Identity–based user flow so each signed-in user can create and view their own diet entries (no shared data across principals).",
+      "id": "REQ-20",
+      "text": "Add an optional speech-to-text (voice dictation) input in the food scanning flow so the user can speak a meal description, have it converted into text, and then manually edit it before saving the scanned entry.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4",
+          "msg-8",
+          "msg-10"
+        ],
+        "quotes": [
+          "User speaks",
+          "User will edit",
+          "Specifically in food scanning"
+        ]
+      },
+      "acceptanceCriteria": [
+        "In the scan confirmation step (the page that currently shows “Confirm Food Details”), there is a clear control (e.g., a microphone button) to start/stop dictation.",
+        "Dictation converts the user’s spoken words into text in a visible editable text field.",
+        "The user can edit the transcribed text before saving.",
+        "If the browser/device does not support speech recognition or permission is denied, the UI shows an English message explaining the issue and still allows manual typing without blocking the flow."
+      ]
+    },
+    {
+      "id": "REQ-21",
+      "text": "Persist the spoken/edited meal description from the scan confirmation step into the saved food entry’s label/description so the spoken summary is stored and visible in existing entry lists/details.",
       "target": "both",
       "source": {
         "messageIds": [
-          "msg-2"
+          "msg-3"
         ],
         "quotes": [
-          "create an app about health it's about health and diet"
+          "there should be a voice option also that I made approx 100 gm oats in this milk and for 5 minutes ... this will be easy than writing"
         ]
       },
       "acceptanceCriteria": [
-        "Users can sign in/out with Internet Identity.",
-        "Creating diet entries while signed in associates entries with the caller principal.",
-        "A user cannot see another user’s entries when using a different principal."
+        "When saving an entry from the scan flow, the saved entry reflects the user’s edited dictated description (not only the auto-detected food name).",
+        "The stored description is visible wherever the app currently displays the entry label/details (e.g., today’s entries list and entry details dialog).",
+        "No existing manual-entry flow is broken by this change."
       ]
     },
     {
-      "id": "REQ-2",
-      "text": "Add a simple daily logging data model and persistence for food entries including: timestamp (day), food label/name, estimated calories, and basic nutrients (macros + a small set of micronutrients).",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-2"
-        ],
-        "quotes": [
-          "daily calorie readings",
-          "tell calories approx calories and basic nutritional values",
-          "basic macro-micronutrients"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Backend exposes CRUD methods needed by the UI to create and list entries.",
-        "Each entry stores calories and at least: protein, carbs, fat; and a small micronutrient set (e.g., fiber, sodium, sugar) as numeric fields.",
-        "Entries are persisted across page refresh and canister calls (stable storage)."
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "text": "Create a Daily Dashboard page that shows: today’s total calories, a list of today’s logged foods, and an end-of-day (and selectable date range) total calorie summary.",
+      "id": "REQ-22",
+      "text": "Add an automatic weekly (last 7 days) summary section that generates goal-aligned feedback, including macro/nutrition suggestions and a 1–10 rating with a congratulatory message when the user is on track.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-2"
+          "msg-3",
+          "msg-6",
+          "msg-7"
         ],
         "quotes": [
-          "daily calorie readings",
-          "at last calories total calories summary"
+          "there should be an opinion or like a summary type after every week",
+          "Automatically",
+          "Automatic"
         ]
       },
       "acceptanceCriteria": [
-        "Dashboard shows today’s total calories computed from today’s entries.",
-        "Dashboard includes a date picker or range selector to compute totals for a selected period.",
-        "Users can add a new entry and see the totals update without a full page reload (React Query invalidation/refetch)."
+        "The Dashboard includes a “Weekly Summary (Last 7 Days)” section that appears without the user needing to manually trigger generation.",
+        "The weekly summary displays: (1) last-7-days totals/averages (at minimum calories and macros), (2) a numeric score from 1 to 10, and (3) a short English feedback message.",
+        "When the score indicates the user is doing well, the summary shows an English congratulatory message.",
+        "If there is insufficient data (e.g., no entries in the last 7 days), the section shows an English empty/insufficient-data state rather than failing silently."
       ]
     },
     {
-      "id": "REQ-4",
-      "text": "Add interactive graphs and rating-style visualizations for engagement, including: calories over time (daily), macro distribution (today or selected day), and a simple daily “nutrition balance” rating derived from logged macros.",
+      "id": "REQ-23",
+      "text": "Make the weekly rating visually engaging by rendering a 1–10 score as a clear rating visualization (e.g., stars or a segmented scale) consistent with the existing UI style.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-2"
+          "msg-3"
         ],
         "quotes": [
-          "rating graphs",
-          "there should be graphs ratings",
-          "so that it seems engaging not one-sided it should be interactive app"
+          "you will give 5 stars, 5 out of 5 sorry 10 out of 10 there should be a score type rating 10 out of 10"
         ]
       },
       "acceptanceCriteria": [
-        "At least 2 graph types are present (e.g., line chart for calories over time; donut/bar for macros).",
-        "Graphs respond to user interaction (hover tooltips, day selection, or range selection).",
-        "A numeric/letter rating (e.g., A–F or 0–100) is shown with an explanation of how it is computed from macros, using clear English copy."
+        "The weekly summary shows a visual rating element that clearly communicates the 1–10 score at a glance.",
+        "The rating visualization and weekly summary card use existing Tailwind/Shadcn styling patterns used elsewhere in the app.",
+        "All user-facing labels in the weekly summary are in English."
       ]
     },
     {
-      "id": "REQ-5",
-      "text": "Implement a Camera Capture flow (preferring the device back camera when available) that lets users take a food photo and then create a log entry from it via an interactive estimation step.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-2"
-        ],
-        "quotes": [
-          "user will scan the food through camera back camera"
-        ]
-      },
-      "acceptanceCriteria": [
-        "On supported devices, the capture UI requests the environment/back camera by default.",
-        "User can capture an image and preview it before saving/using it.",
-        "After capture, the UI proceeds to an estimation/confirmation step rather than auto-logging silently."
-      ]
-    },
-    {
-      "id": "REQ-6",
-      "text": "Provide an in-app “AI-like” chat helper experience for diet/nutrition confusion using an on-device/in-app rules + curated FAQ knowledge base (no external LLM calls), including suggested questions and citations to the app’s own guidance.",
+      "id": "REQ-24",
+      "text": "Generate weekly feedback using fully local, deterministic rules (no external calls), leveraging the user’s stored body goal (if available) and the logged macros/calories for the last 7 days.",
       "target": "both",
       "source": {
         "messageIds": [
-          "msg-2"
+          "msg-3"
         ],
         "quotes": [
-          "there should be an AI to chat also if user has any confusion"
+          "you should give him or her suggestion AI suggestion ... according to his or her diet"
         ]
       },
       "acceptanceCriteria": [
-        "Chat UI supports back-and-forth messages with timestamps and clear assistant/user styling.",
-        "Assistant answers are generated from a deterministic curated knowledge base and/or rules stored in the app/canister (no third-party AI service calls).",
-        "Chat includes suggested prompts (e.g., “What is a calorie deficit?”, “How much protein should I aim for?”) and shows a fallback message when it cannot answer."
-      ]
-    },
-    {
-      "id": "REQ-7",
-      "text": "Add at least one clearly defined “unique” differentiator feature that is not just logging/graphs/chat: implement a “Confidence & Portion Adjuster” step when creating an entry (user adjusts portion size and confidence; calories/nutrients update live and the app stores the confidence value).",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-2"
-        ],
-        "quotes": [
-          "it should have unique features unique other than any app present currently"
-        ]
-      },
-      "acceptanceCriteria": [
-        "When creating an entry (including from camera capture), the user can adjust portion size (e.g., 0.5x–2.0x) and a confidence slider (e.g., Low/Medium/High).",
-        "Displayed calories/macros update immediately based on portion multiplier.",
-        "Saved entries persist both portion multiplier and confidence level and show them in the entry details."
-      ]
-    },
-    {
-      "id": "REQ-8",
-      "text": "Design a simple, easy UI with a coherent visual theme applied consistently across pages and components (colors, typography, spacing, and layout). Avoid a blue/purple default palette.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-2"
-        ],
-        "quotes": [
-          "it should have a easy and simple user interface"
-        ]
-      },
-      "acceptanceCriteria": [
-        "UI uses a consistent theme (e.g., warm neutrals + green accents) across navigation, cards, buttons, and charts.",
-        "Primary flows (sign-in, dashboard, add entry, camera capture, chat) are reachable within 1–2 clicks from the main navigation.",
-        "All user-facing text is in English."
-      ]
-    },
-    {
-      "id": "REQ-9",
-      "text": "Add generated static image assets (logo + key illustrations) under frontend/public/assets/generated and render them in the UI (e.g., app header/logo and empty states).",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-2"
-        ],
-        "quotes": [
-          "interactive app"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Generated images exist in frontend/public/assets/generated with the exact filenames specified in imageRequirements.required.",
-        "At least the app header and one empty state use the generated images.",
-        "Images are loaded directly from static assets (not fetched from the backend)."
+        "Weekly feedback generation does not call any external services/APIs.",
+        "If the user has a body goal configured, the weekly feedback references it (e.g., “Lose Weight”, “Gain Muscle”) in English.",
+        "The app produces at least one concrete suggestion when the score is not high (e.g., suggest increasing protein if protein share is low), based only on logged data and simple rules.",
+        "The feature works per-user (no data leakage across principals)."
       ]
     }
   ],
   "constraints": [
-    "Do not edit files under frontend/src/components/ui or any paths listed as immutable (compose them instead).",
-    "Backend must remain a single Motoko actor (all logic in the main actor).",
-    "Do not integrate third-party LLM/AI services (no OpenAI/Anthropic/etc.); the chat helper must be implemented via curated content/rules within the app.",
-    "Do not rely on external databases or third-party food nutrition APIs; any estimation must use in-app/canister-owned data and user confirmation."
+    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or anything under frontend/src/components/ui (compose these components instead).",
+    "Use only local/on-device capabilities for voice input (browser speech recognition) and weekly feedback; do not add any external AI/LLM calls.",
+    "Respect the single-actor Motoko backend architecture (all logic in backend/main.mo); add backend state migration only if the persisted data model changes."
   ],
   "nonGoals": [
-    "Exact calorie/nutrition recognition from images using a real ML model.",
-    "Medical diagnosis, treatment recommendations, or clinically validated nutrition planning.",
-    "Social features (followers, messaging, real-time chat) and push notifications."
+    "Do not implement voice control/commands that automatically parse ingredients and quantities into structured nutrients (voice is for dictation into an editable summary only).",
+    "Do not add real-time chat, WebSockets, push notifications, or any external messaging/voice services.",
+    "Do not redesign the existing scan capture flow beyond adding the optional dictation + weekly summary UI."
   ],
   "imageRequirements": {
-    "required": [
-      "Minimal leaf + fork logo, flat vector style, warm neutral background (app-logo.dim_512x512.png)",
-      "Friendly food scanning illustration with phone outline and plate/food shapes, flat vector style (scan-hero.dim_1200x600.png)",
-      "Empty state illustration showing a simple bowl/plate and subtle graph elements, flat vector style (empty-entries.dim_800x600.png)",
-      "Camera scanning frame overlay graphic with corner brackets, transparent background (scan-frame-overlay.dim_1080x1920.png)"
-    ],
+    "required": [],
     "edits": []
   },
   "userProfileUpdate": {

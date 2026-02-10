@@ -18,6 +18,7 @@ export interface FoodEntry {
     day: bigint;
     owner: Principal;
     calories: number;
+    description: string;
     confidenceLevel: number;
     portionSize: number;
     micronutrients: {
@@ -32,8 +33,38 @@ export interface FoodEntry {
     };
     foodLabel: string;
 }
+export interface BodyGoalDetails {
+    goalType: GoalType;
+    weeklyGoalSpeed: number;
+    targetWeight: number;
+    currentWeight: number;
+}
+export interface WeeklyFeedback {
+    totalCarbs: number;
+    feedbackType: FeedbackType;
+    avgCalories: number;
+    totalFat: number;
+    entriesChecked: bigint;
+    totalProtein: number;
+    entriesPerDay: number;
+}
 export interface UserProfile {
     name: string;
+    bodyGoal?: BodyGoalDetails;
+}
+export enum FeedbackType {
+    offBalance = "offBalance",
+    goodJob = "goodJob",
+    notEnoughData = "notEnoughData",
+    overrange = "overrange",
+    underrange = "underrange",
+    partialFocus = "partialFocus"
+}
+export enum GoalType {
+    gainMuscle = "gainMuscle",
+    maintain = "maintain",
+    gainWeight = "gainWeight",
+    loseWeight = "loseWeight"
 }
 export enum UserRole {
     admin = "admin",
@@ -41,7 +72,7 @@ export enum UserRole {
     guest = "guest"
 }
 export interface backendInterface {
-    addFoodEntry(day: bigint, foodLabel: string, calories: number, macros: {
+    addFoodEntry(day: bigint, foodLabel: string, description: string, calories: number, macros: {
         fat: number;
         carbs: number;
         protein: number;
@@ -57,6 +88,8 @@ export interface backendInterface {
     getPortionAdjusterGuidance(): Promise<string>;
     getSuggestedQuestions(): Promise<Array<QuestionSuggestion>>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
+    getWeeklyFeedback(): Promise<WeeklyFeedback>;
     isCallerAdmin(): Promise<boolean>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
+    updateBodyGoal(details: BodyGoalDetails): Promise<void>;
 }

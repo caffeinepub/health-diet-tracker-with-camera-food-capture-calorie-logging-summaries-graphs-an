@@ -1,107 +1,34 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-10T05:31:26.270Z",
-  "summary": "The diff adds a Motoko backend actor with per-principal food entries (including macros/micros, portion size, and confidence), plus frontend routing and UI components for login gating, entry estimation/confirmation with portion+confidence sliders, charts (line + pie) and a macro-based “nutrition balance” rating, and a rules/FAQ-style helper chat UI. However, some requirements are either not evidenced (due to truncation/omissions) or appear unimplemented: stable persistence + full CRUD on the backend, and using the generated logo asset in the app header (and ensuring the required generated image files exist).",
+  "generatedAt": "2026-02-10T06:27:01.476Z",
+  "summary": "The diff implements speech-to-text dictation in the scan confirmation step and persists an editable description into stored food entries (including backend state migration). It also adds an automatic Dashboard “Weekly Summary (Last 7 Days)” card with a 1–10 style visualization and deterministic, local rule-based feedback. One clear mismatch is that the weekly summary returns a score of 0 when there are zero entries, which violates the 1–10 score acceptance criteria.",
   "missing_requirements": [
     {
-      "id": "REQ-2",
-      "requirement": "Persist food entries across page refresh and canister calls (stable storage).",
-      "reason": "The backend shows in-memory vars/maps (`var nextEntryId`, `let foodEntries = Map.empty...`) but no stable variables or `preupgrade`/`postupgrade` logic is visible in the provided `backend/main.mo` excerpt. With only the shown code, persistence across upgrades/refreshes is not evidenced.",
+      "id": "REQ-22",
+      "requirement": "Weekly summary displays a numeric score from 1 to 10 (with an insufficient-data state when no entries exist).",
+      "reason": "For the empty-data case, the weekly summary generator returns score = 0, which is outside the required 1–10 range.",
       "evidence": [
-        "backend/main.mo"
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "requirement": "Expose CRUD methods needed by the UI to create and list entries (CRUD).",
-      "reason": "The backend excerpt includes `addFoodEntry` (create) and `getFoodEntriesForCaller` (list), but no update or delete methods are shown. If full CRUD is intended, update/delete are not evidenced in the diff summary.",
-      "evidence": [
-        "backend/main.mo"
-      ]
-    },
-    {
-      "id": "REQ-9",
-      "requirement": "Render the generated static logo asset in the UI (e.g., in the app header).",
-      "reason": "`AppHeader` renders a Lucide `Leaf` icon and the text “NutriScan”, but does not render the required generated logo image (`/assets/generated/app-logo.dim_512x512.png`).",
-      "evidence": [
-        "frontend/src/components/layout/AppHeader.tsx"
-      ]
-    },
-    {
-      "id": "REQ-9",
-      "requirement": "Generated images exist under `frontend/public/assets/generated` with the exact required filenames (logo + 3 illustrations + scan frame overlay).",
-      "reason": "The diff summary does not include any added image files under `frontend/public/assets/generated` (and notes many omitted added files). Only a reference to one required image is visible in code; existence of the actual files and all required filenames is not evidenced from the provided diff summary.",
-      "evidence": [
-        "frontend/src/components/entries/EmptyEntriesState.tsx"
+        "frontend/src/utils/weeklyFeedback.ts"
       ]
     }
   ],
-  "hallucinated_features": [
-    {
-      "description": "Admin/role-based access control initialization using a secret URL parameter (`caffeineAdminToken`) and `_initializeAccessControlWithSecret`.",
-      "reason": "The BuildRequest does not ask for admin tokens, secret URL parameters, or role-based access control initialization; it only requires per-Internet-Identity user separation.",
-      "evidence": [
-        "frontend/src/hooks/useActor.ts",
-        "backend/main.mo"
-      ]
-    },
-    {
-      "description": "User profile creation/setup flow (name-based profile stored in canister) and a mandatory profile setup dialog after login.",
-      "reason": "The BuildRequest requirements focus on diet entries, dashboard, camera flow, graphs, and helper chat; a user profile model and onboarding dialog are not requested.",
-      "evidence": [
-        "backend/main.mo",
-        "frontend/src/components/auth/ProfileSetupDialog.tsx",
-        "frontend/src/App.tsx"
-      ]
-    },
-    {
-      "description": "Footer link and attribution to `caffeine.ai` with UTM parameters.",
-      "reason": "Not requested by the BuildRequest and not part of any acceptance criteria.",
-      "evidence": [
-        "frontend/src/components/layout/AppLayout.tsx"
-      ]
-    }
-  ],
-  "confidence": 0.74,
+  "hallucinated_features": [],
+  "confidence": 0.66,
   "changed_files": [
-    "all_files_summary.json",
     "backend/main.mo",
+    "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/index.css",
-    "frontend/index.html",
-    "frontend/src/App.tsx",
-    "frontend/src/components/auth/LoginButton.tsx",
-    "frontend/src/components/auth/ProfileSetupDialog.tsx",
-    "frontend/src/components/camera/CapturedPhotoPreview.tsx",
-    "frontend/src/components/chat/ChatTranscript.tsx",
-    "frontend/src/components/chat/SuggestedPrompts.tsx",
-    "frontend/src/components/entries/DateRangePicker.tsx",
-    "frontend/src/components/entries/EmptyEntriesState.tsx",
     "frontend/src/components/entries/EntryDetailsDialog.tsx",
     "frontend/src/components/entries/EstimationConfirmationStep.tsx",
-    "frontend/src/components/entries/PortionConfidenceAdjuster.tsx",
     "frontend/src/components/entries/TodayEntriesList.tsx",
-    "frontend/src/components/graphs/CaloriesOverTimeChart.tsx",
-    "frontend/src/components/graphs/MacroDistributionChart.tsx",
-    "frontend/src/components/graphs/NutritionBalanceRating.tsx",
-    "frontend/src/components/layout/AppHeader.tsx",
-    "frontend/src/components/layout/AppLayout.tsx",
-    "frontend/src/hooks/useActor.ts",
-    "frontend/src/hooks/useChatKnowledgeBase.ts",
-    "frontend/src/hooks/useCurrentUserProfile.ts",
+    "frontend/src/components/graphs/WeeklyRatingScale.tsx",
+    "frontend/src/components/graphs/WeeklySummaryCard.tsx",
     "frontend/src/hooks/useFoodEntries.ts",
-    "frontend/src/hooks/useInternetIdentity.ts",
-    "frontend/src/hooks/usePortionAdjusterGuidance.ts",
-    "frontend/src/index.css",
-    "frontend/src/main.tsx",
+    "frontend/src/hooks/useSpeechToText.ts",
     "frontend/src/pages/AddEntryPage.tsx",
-    "frontend/src/pages/CameraCapturePage.tsx",
     "frontend/src/pages/DashboardPage.tsx",
-    "frontend/src/pages/HelperChatPage.tsx",
-    "frontend/src/pages/LoginPage.tsx",
-    "frontend/src/utils/urlParams.ts",
-    "frontend/tailwind.config.js",
+    "frontend/src/utils/weeklyFeedback.ts",
     "project_state.json"
   ]
 }

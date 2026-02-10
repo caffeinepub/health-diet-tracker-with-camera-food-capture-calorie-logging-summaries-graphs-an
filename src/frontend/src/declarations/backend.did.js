@@ -13,12 +13,28 @@ export const UserRole = IDL.Variant({
   'user' : IDL.Null,
   'guest' : IDL.Null,
 });
-export const UserProfile = IDL.Record({ 'name' : IDL.Text });
+export const GoalType = IDL.Variant({
+  'gainMuscle' : IDL.Null,
+  'maintain' : IDL.Null,
+  'gainWeight' : IDL.Null,
+  'loseWeight' : IDL.Null,
+});
+export const BodyGoalDetails = IDL.Record({
+  'goalType' : GoalType,
+  'weeklyGoalSpeed' : IDL.Float64,
+  'targetWeight' : IDL.Float64,
+  'currentWeight' : IDL.Float64,
+});
+export const UserProfile = IDL.Record({
+  'name' : IDL.Text,
+  'bodyGoal' : IDL.Opt(BodyGoalDetails),
+});
 export const FoodEntry = IDL.Record({
   'id' : IDL.Nat,
   'day' : IDL.Int,
   'owner' : IDL.Principal,
   'calories' : IDL.Float64,
+  'description' : IDL.Text,
   'confidenceLevel' : IDL.Float64,
   'portionSize' : IDL.Float64,
   'micronutrients' : IDL.Record({
@@ -39,12 +55,30 @@ export const QuestionSuggestion = IDL.Record({
   'answer' : IDL.Text,
   'citations' : IDL.Vec(IDL.Text),
 });
+export const FeedbackType = IDL.Variant({
+  'offBalance' : IDL.Null,
+  'goodJob' : IDL.Null,
+  'notEnoughData' : IDL.Null,
+  'overrange' : IDL.Null,
+  'underrange' : IDL.Null,
+  'partialFocus' : IDL.Null,
+});
+export const WeeklyFeedback = IDL.Record({
+  'totalCarbs' : IDL.Float64,
+  'feedbackType' : FeedbackType,
+  'avgCalories' : IDL.Float64,
+  'totalFat' : IDL.Float64,
+  'entriesChecked' : IDL.Nat,
+  'totalProtein' : IDL.Float64,
+  'entriesPerDay' : IDL.Float64,
+});
 
 export const idlService = IDL.Service({
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
   'addFoodEntry' : IDL.Func(
       [
         IDL.Int,
+        IDL.Text,
         IDL.Text,
         IDL.Float64,
         IDL.Record({
@@ -82,8 +116,10 @@ export const idlService = IDL.Service({
       [IDL.Opt(UserProfile)],
       ['query'],
     ),
+  'getWeeklyFeedback' : IDL.Func([], [WeeklyFeedback], ['query']),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+  'updateBodyGoal' : IDL.Func([BodyGoalDetails], [], []),
 });
 
 export const idlInitArgs = [];
@@ -94,12 +130,28 @@ export const idlFactory = ({ IDL }) => {
     'user' : IDL.Null,
     'guest' : IDL.Null,
   });
-  const UserProfile = IDL.Record({ 'name' : IDL.Text });
+  const GoalType = IDL.Variant({
+    'gainMuscle' : IDL.Null,
+    'maintain' : IDL.Null,
+    'gainWeight' : IDL.Null,
+    'loseWeight' : IDL.Null,
+  });
+  const BodyGoalDetails = IDL.Record({
+    'goalType' : GoalType,
+    'weeklyGoalSpeed' : IDL.Float64,
+    'targetWeight' : IDL.Float64,
+    'currentWeight' : IDL.Float64,
+  });
+  const UserProfile = IDL.Record({
+    'name' : IDL.Text,
+    'bodyGoal' : IDL.Opt(BodyGoalDetails),
+  });
   const FoodEntry = IDL.Record({
     'id' : IDL.Nat,
     'day' : IDL.Int,
     'owner' : IDL.Principal,
     'calories' : IDL.Float64,
+    'description' : IDL.Text,
     'confidenceLevel' : IDL.Float64,
     'portionSize' : IDL.Float64,
     'micronutrients' : IDL.Record({
@@ -120,12 +172,30 @@ export const idlFactory = ({ IDL }) => {
     'answer' : IDL.Text,
     'citations' : IDL.Vec(IDL.Text),
   });
+  const FeedbackType = IDL.Variant({
+    'offBalance' : IDL.Null,
+    'goodJob' : IDL.Null,
+    'notEnoughData' : IDL.Null,
+    'overrange' : IDL.Null,
+    'underrange' : IDL.Null,
+    'partialFocus' : IDL.Null,
+  });
+  const WeeklyFeedback = IDL.Record({
+    'totalCarbs' : IDL.Float64,
+    'feedbackType' : FeedbackType,
+    'avgCalories' : IDL.Float64,
+    'totalFat' : IDL.Float64,
+    'entriesChecked' : IDL.Nat,
+    'totalProtein' : IDL.Float64,
+    'entriesPerDay' : IDL.Float64,
+  });
   
   return IDL.Service({
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
     'addFoodEntry' : IDL.Func(
         [
           IDL.Int,
+          IDL.Text,
           IDL.Text,
           IDL.Float64,
           IDL.Record({
@@ -163,8 +233,10 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Opt(UserProfile)],
         ['query'],
       ),
+    'getWeeklyFeedback' : IDL.Func([], [WeeklyFeedback], ['query']),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+    'updateBodyGoal' : IDL.Func([BodyGoalDetails], [], []),
   });
 };
 

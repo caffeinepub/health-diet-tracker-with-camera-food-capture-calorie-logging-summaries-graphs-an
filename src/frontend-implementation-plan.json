@@ -1,303 +1,138 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Health & Diet Tracker (Frontend): II auth, dashboard logging, camera capture, graphs, helper chat, theme, and generated assets",
+  "title": "Speech-to-text meal description in scan confirmation + automatic weekly summary feedback",
   "requirements": [
     {
-      "id": "REQ-1",
-      "summary": "Internet Identity sign-in/out flow with per-user (principal-scoped) access to diet entries and first-login profile setup UI.",
+      "id": "REQ-20",
+      "summary": "Add optional on-device speech-to-text dictation to the scan confirmation step with editable transcription and graceful fallback.",
       "acceptanceCriteria": [
-        "Users can sign in/out with Internet Identity.",
-        "Creating diet entries while signed in associates entries with the caller principal.",
-        "A user cannot see another user’s entries when using a different principal."
+        "In the scan confirmation step (the page that currently shows “Confirm Food Details”), there is a clear control (e.g., a microphone button) to start/stop dictation.",
+        "Dictation converts the user’s spoken words into text in a visible editable text field.",
+        "The user can edit the transcribed text before saving.",
+        "If the browser/device does not support speech recognition or permission is denied, the UI shows an English message explaining the issue and still allows manual typing without blocking the flow."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/App.tsx",
+          "path": "frontend/src/hooks/useSpeechToText.ts",
           "operation": "create",
-          "description": "Create the app shell with route wiring and an auth gate that requires Internet Identity before showing any personal diet data (redirect/guard to sign-in + profile setup when needed)."
+          "description": "Create a React hook that wraps the browser Web Speech API (SpeechRecognition / webkitSpeechRecognition) to support start/stop dictation, interim/final transcript updates, and error states (not-supported, permission denied). Use only local/on-device speech recognition and expose English error messages for the UI."
         },
         {
-          "path": "frontend/src/components/auth/LoginButton.tsx",
-          "operation": "create",
-          "description": "Create a Login/Logout button using the selected authorization component’s Internet Identity flow (useInternetIdentity), clearing React Query cache on logout. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/auth/ProfileSetupDialog.tsx",
-          "operation": "create",
-          "description": "Create a first-login profile setup dialog (ask for a display name) that uses authorization component guidance to prevent modal flash (query enabled only after actor is ready) and avoids showing principal IDs. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/hooks/useCurrentUserProfile.ts",
-          "operation": "create",
-          "description": "Add React Query hooks for getCallerUserProfile/saveCallerUserProfile and role helpers (getCallerUserRole/isCallerAdmin) to support authenticated UX and graceful unauthorized handling."
-        },
-        {
-          "path": "frontend/src/components/layout/AppHeader.tsx",
-          "operation": "create",
-          "description": "Create a header that shows the app name/logo, signed-in user display name (from profile), and LoginButton; include navigation links to Dashboard, Add Entry, Camera Capture, and Helper Chat."
+          "path": "frontend/src/components/entries/EstimationConfirmationStep.tsx",
+          "operation": "modify",
+          "description": "Add an optional meal description field to the “Confirm Food Details” step and integrate dictation controls using the new useSpeechToText hook (microphone start/stop). Ensure transcription is shown in an editable text input/textarea, allow manual edits at any time, and show a clear English fallback message when speech recognition is unavailable or permission is denied without blocking saving."
         }
       ]
     },
     {
-      "id": "REQ-3",
-      "summary": "Daily Dashboard page with today totals, today entries list, and selectable date-range calorie totals with React Query refetch/invalidation.",
+      "id": "REQ-21",
+      "summary": "Persist the spoken/edited meal description from scan confirmation into saved entries and display it in existing entry list/details UI without breaking manual entry.",
       "acceptanceCriteria": [
-        "Dashboard shows today’s total calories computed from today’s entries.",
-        "Dashboard includes a date picker or range selector to compute totals for a selected period.",
-        "Users can add a new entry and see the totals update without a full page reload (React Query invalidation/refetch)."
+        "When saving an entry from the scan flow, the saved entry reflects the user’s edited dictated description (not only the auto-detected food name).",
+        "The stored description is visible wherever the app currently displays the entry label/details (e.g., today’s entries list and entry details dialog).",
+        "No existing manual-entry flow is broken by this change."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/DashboardPage.tsx",
-          "operation": "create",
-          "description": "Implement the Daily Dashboard page: show today's total calories, list of today's entries, and a date range selector that recomputes totals based on entries fetched for the selected range."
+          "path": "frontend/src/hooks/useFoodEntries.ts",
+          "operation": "modify",
+          "description": "Update the add-food-entry mutation to include a description string parameter and pass arguments in the correct order to the backend actor so the entry description is persisted. Keep description optional at call sites by allowing an empty string default."
         },
         {
-          "path": "frontend/src/hooks/useFoodEntries.ts",
-          "operation": "create",
-          "description": "Add React Query hooks to fetch entries for the signed-in user via backend capability getFoodEntriesForCaller(startDay,endDay) and compute client-side totals for today/range."
+          "path": "frontend/src/components/entries/EstimationConfirmationStep.tsx",
+          "operation": "modify",
+          "description": "Wire the scan confirmation’s editable description (including dictated/edited text) into the save action by passing it to useAddFoodEntry so it becomes the entry’s persisted description."
+        },
+        {
+          "path": "frontend/src/pages/AddEntryPage.tsx",
+          "operation": "modify",
+          "description": "Ensure the manual add-entry flow continues to work by supplying a description value to useAddFoodEntry (default empty string). Optionally add a non-required 'Description' field if it fits the existing form layout, without changing required validation for the existing fields."
         },
         {
           "path": "frontend/src/components/entries/TodayEntriesList.tsx",
-          "operation": "create",
-          "description": "Create a presentational list component for today’s foods showing label, calories, macros, portion multiplier, and confidence level (read-only display)."
-        },
-        {
-          "path": "frontend/src/components/entries/DateRangePicker.tsx",
-          "operation": "create",
-          "description": "Create a simple date and range selector UI (e.g., start/end day) to drive dashboard summary and graphs."
-        },
-        {
-          "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Wire the Dashboard route into the router and main navigation so it is reachable within 1–2 clicks from the header."
-        },
-        {
-          "path": "frontend/src/pages/AddEntryPage.tsx",
-          "operation": "create",
-          "description": "Create an Add Entry page (manual entry) that submits to backend capability addFoodEntry(...) and triggers React Query invalidation so the Dashboard updates without full page reload."
-        }
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "summary": "Interactive graphs and nutrition-balance rating visualization for calories over time and macro distribution, driven by logged entries and user-selected date/day.",
-      "acceptanceCriteria": [
-        "At least 2 graph types are present (e.g., line chart for calories over time; donut/bar for macros).",
-        "Graphs respond to user interaction (hover tooltips, day selection, or range selection).",
-        "A numeric/letter rating (e.g., A–F or 0–100) is shown with an explanation of how it is computed from macros, using clear English copy."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/graphs/CaloriesOverTimeChart.tsx",
-          "operation": "create",
-          "description": "Implement an interactive calories-over-time chart (daily aggregation) with hover tooltip and day selection that updates the selected day context for other widgets."
-        },
-        {
-          "path": "frontend/src/components/graphs/MacroDistributionChart.tsx",
-          "operation": "create",
-          "description": "Implement an interactive macro distribution chart (e.g., donut or stacked bar) for the selected day (or today) with hover tooltips showing grams and percentages."
-        },
-        {
-          "path": "frontend/src/components/graphs/NutritionBalanceRating.tsx",
-          "operation": "create",
-          "description": "Create a 'nutrition balance' rating visualization (A–F or 0–100) computed deterministically from logged macros, including clear English explanation text describing the formula and its limits."
-        },
-        {
-          "path": "frontend/src/pages/DashboardPage.tsx",
-          "operation": "modify",
-          "description": "Add the chart components to the Dashboard and connect them to the selected range/day state so graphs respond to user interaction and range changes."
-        }
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "summary": "Camera Capture flow (defaulting to back camera) with preview and an estimation/confirmation step before creating a food entry.",
-      "acceptanceCriteria": [
-        "On supported devices, the capture UI requests the environment/back camera by default.",
-        "User can capture an image and preview it before saving/using it.",
-        "After capture, the UI proceeds to an estimation/confirmation step rather than auto-logging silently."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/CameraCapturePage.tsx",
-          "operation": "create",
-          "description": "Create a camera capture page using the selected camera component hook useCamera configured to prefer facingMode 'environment'; show stable-sized preview, capture button, error states, and captured image preview. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/camera/CapturedPhotoPreview.tsx",
-          "operation": "create",
-          "description": "Create a preview step for the captured photo (client-side File), with actions to retake or proceed to estimation/confirmation."
-        },
-        {
-          "path": "frontend/src/components/entries/EstimationConfirmationStep.tsx",
-          "operation": "create",
-          "description": "Implement the post-capture estimation/confirmation UI: user enters food label and baseline calories/macros/micronutrients, then proceeds into the portion/confidence adjuster before saving."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Wire the Camera Capture route and navigation entry so it is reachable within 1–2 clicks from the main navigation."
-        },
-        {
-          "path": "frontend/public/assets/generated/scan-frame-overlay.dim_1080x1920.png",
-          "operation": "create",
-          "description": "Add the generated camera scanning frame overlay asset at the exact path frontend/public/assets/generated/scan-frame-overlay.dim_1080x1920.png and use it in the camera preview UI."
-        },
-        {
-          "path": "frontend/src/pages/CameraCapturePage.tsx",
-          "operation": "modify",
-          "description": "Render the static overlay image from frontend/public/assets/generated/scan-frame-overlay.dim_1080x1920.png on top of the live camera preview (no backend fetch)."
-        }
-      ]
-    },
-    {
-      "id": "REQ-6",
-      "summary": "In-app deterministic 'AI-like' helper chat UI using curated knowledge base/rules with suggested prompts and citations (no external AI calls).",
-      "acceptanceCriteria": [
-        "Chat UI supports back-and-forth messages with timestamps and clear assistant/user styling.",
-        "Assistant answers are generated from a deterministic curated knowledge base and/or rules stored in the app/canister (no third-party AI service calls).",
-        "Chat includes suggested prompts (e.g., “What is a calorie deficit?”, “How much protein should I aim for?”) and shows a fallback message when it cannot answer."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/HelperChatPage.tsx",
-          "operation": "create",
-          "description": "Create the helper chat page with message list, timestamped bubbles, user input, and a deterministic response flow driven by curated suggestions (no external services)."
-        },
-        {
-          "path": "frontend/src/hooks/useChatKnowledgeBase.ts",
-          "operation": "create",
-          "description": "Add a hook that loads curated suggestions via backend capability getSuggestedQuestions(), provides deterministic matching/selection logic, and returns fallback responses when no answer is found."
-        },
-        {
-          "path": "frontend/src/components/chat/SuggestedPrompts.tsx",
-          "operation": "create",
-          "description": "Implement suggested prompt chips/buttons populated from curated suggestions to quickly insert/send common questions."
-        },
-        {
-          "path": "frontend/src/components/chat/ChatTranscript.tsx",
-          "operation": "create",
-          "description": "Create a transcript component rendering assistant/user styling and citations (display citations list under assistant answers)."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Wire the Helper Chat route and navigation entry so it is reachable within 1–2 clicks from the main navigation."
-        }
-      ]
-    },
-    {
-      "id": "REQ-7",
-      "summary": "Confidence & Portion Adjuster step when creating entries (manual and camera flows) with live-updating calories/nutrients and saved confidence/portion values displayed in entry details.",
-      "acceptanceCriteria": [
-        "When creating an entry (including from camera capture), the user can adjust portion size (e.g., 0.5x–2.0x) and a confidence slider (e.g., Low/Medium/High).",
-        "Displayed calories/macros update immediately based on portion multiplier.",
-        "Saved entries persist both portion multiplier and confidence level and show them in the entry details."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/entries/PortionConfidenceAdjuster.tsx",
-          "operation": "create",
-          "description": "Create the 'Confidence & Portion Adjuster' UI control (portion multiplier + confidence level) that live-recomputes derived calories/macros/micronutrients in the UI."
-        },
-        {
-          "path": "frontend/src/hooks/usePortionAdjusterGuidance.ts",
-          "operation": "create",
-          "description": "Add a React Query hook to load in-app guidance copy via backend capability getPortionAdjusterGuidance() and display it near the adjuster for explainability."
-        },
-        {
-          "path": "frontend/src/pages/AddEntryPage.tsx",
-          "operation": "modify",
-          "description": "Integrate the adjuster step into manual entry creation so the saved entry includes portionSize and confidenceLevel and the displayed nutrition updates live before saving."
-        },
-        {
-          "path": "frontend/src/components/entries/EstimationConfirmationStep.tsx",
-          "operation": "modify",
-          "description": "Integrate the adjuster step into the camera-derived estimation flow so users confirm/adjust before saving, with live nutrition updates."
+          "description": "Display the entry description (when present) in the existing today entries list UI in a compact, readable way while keeping the existing foodLabel and calories display."
         },
         {
           "path": "frontend/src/components/entries/EntryDetailsDialog.tsx",
-          "operation": "create",
-          "description": "Add an entry details UI showing portion multiplier and confidence level alongside calories/macros/micronutrients (read-only), used from the Dashboard list."
-        },
-        {
-          "path": "frontend/src/components/entries/TodayEntriesList.tsx",
           "operation": "modify",
-          "description": "Wire entry click/tap to open EntryDetailsDialog so saved portion/confidence are visible in entry details."
+          "description": "Add an English-labeled section in the entry details dialog to show the saved entry description (when non-empty) alongside existing nutrient details."
         }
       ]
     },
     {
-      "id": "REQ-8",
-      "summary": "Simple coherent visual theme across core flows (sign-in, dashboard, add entry, camera, chat) with non-blue/purple palette and consistent layout/typography.",
+      "id": "REQ-22",
+      "summary": "Add an automatic “Weekly Summary (Last 7 Days)” section on the Dashboard showing totals/averages, a 1–10 score, and an English feedback message with an insufficient-data state.",
       "acceptanceCriteria": [
-        "UI uses a consistent theme (e.g., warm neutrals + green accents) across navigation, cards, buttons, and charts.",
-        "Primary flows (sign-in, dashboard, add entry, camera capture, chat) are reachable within 1–2 clicks from the main navigation.",
-        "All user-facing text is in English."
+        "The Dashboard includes a “Weekly Summary (Last 7 Days)” section that appears without the user needing to manually trigger generation.",
+        "The weekly summary displays: (1) last-7-days totals/averages (at minimum calories and macros), (2) a numeric score from 1 to 10, and (3) a short English feedback message.",
+        "When the score indicates the user is doing well, the summary shows an English congratulatory message.",
+        "If there is insufficient data (e.g., no entries in the last 7 days), the section shows an English empty/insufficient-data state rather than failing silently."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/index.css",
+          "path": "frontend/src/utils/weeklyFeedback.ts",
           "operation": "create",
-          "description": "Create global styles and CSS variables for a warm neutral + green accent theme (avoid blue/purple defaults), ensuring consistent typography, spacing, and backgrounds across the app."
+          "description": "Implement deterministic, fully local helper functions to compute last-7-days totals/averages (calories + macros), determine whether there is sufficient data, and produce a 1–10 score plus an English feedback message based on simple rules."
         },
         {
-          "path": "frontend/tailwind.config.js",
-          "operation": "modify",
-          "description": "Adjust Tailwind theme tokens (via CSS variables already referenced) to align charts/cards/primary colors with the warm neutral + green accent palette."
-        },
-        {
-          "path": "frontend/src/components/layout/AppLayout.tsx",
+          "path": "frontend/src/components/graphs/WeeklySummaryCard.tsx",
           "operation": "create",
-          "description": "Create a shared layout wrapper for consistent page padding, max width, card styling conventions, and responsive behavior across Dashboard/Add Entry/Camera/Chat."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Apply AppLayout/AppHeader consistently across routes so all primary flows remain reachable within 1–2 clicks and all copy remains in English."
-        }
-      ]
-    },
-    {
-      "id": "REQ-9",
-      "summary": "Add generated static image assets under frontend/public/assets/generated and render them in the app header and empty states.",
-      "acceptanceCriteria": [
-        "Generated images exist in frontend/public/assets/generated with the exact filenames specified in imageRequirements.required.",
-        "At least the app header and one empty state use the generated images.",
-        "Images are loaded directly from static assets (not fetched from the backend)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/public/assets/generated/app-logo.dim_512x512.png",
-          "operation": "create",
-          "description": "Add the generated logo asset at the exact path frontend/public/assets/generated/app-logo.dim_512x512.png."
-        },
-        {
-          "path": "frontend/public/assets/generated/scan-hero.dim_1200x600.png",
-          "operation": "create",
-          "description": "Add the generated scan hero illustration at the exact path frontend/public/assets/generated/scan-hero.dim_1200x600.png."
-        },
-        {
-          "path": "frontend/public/assets/generated/empty-entries.dim_800x600.png",
-          "operation": "create",
-          "description": "Add the generated empty state illustration at the exact path frontend/public/assets/generated/empty-entries.dim_800x600.png."
-        },
-        {
-          "path": "frontend/src/components/layout/AppHeader.tsx",
-          "operation": "modify",
-          "description": "Render the static header logo using frontend/public/assets/generated/app-logo.dim_512x512.png (loaded as a static asset, not from backend)."
-        },
-        {
-          "path": "frontend/src/components/entries/EmptyEntriesState.tsx",
-          "operation": "create",
-          "description": "Create an empty state component for when there are no entries in the selected period, rendering frontend/public/assets/generated/empty-entries.dim_800x600.png and English guidance text."
+          "description": "Create a Dashboard-ready Weekly Summary card component that renders: (1) calories/macros totals/averages, (2) a numeric 1–10 score, (3) an English feedback message (including congratulatory text when on track), and (4) an English insufficient-data state when last-7-days entries are missing."
         },
         {
           "path": "frontend/src/pages/DashboardPage.tsx",
           "operation": "modify",
-          "description": "Show EmptyEntriesState when the selected day/range has no entries, and optionally include the scan hero illustration frontend/public/assets/generated/scan-hero.dim_1200x600.png as a secondary illustration in a non-orphaned section."
+          "description": "Fetch the last 7 days of entries using existing useGetFoodEntries (rangeStart=today-6, rangeEnd=today) and render the new “Weekly Summary (Last 7 Days)” section automatically on the Dashboard using WeeklySummaryCard (no manual trigger). Ensure all user-facing labels are in English."
+        }
+      ]
+    },
+    {
+      "id": "REQ-23",
+      "summary": "Render the weekly 1–10 rating as a clear, visually engaging visualization consistent with existing Tailwind/shadcn styling.",
+      "acceptanceCriteria": [
+        "The weekly summary shows a visual rating element that clearly communicates the 1–10 score at a glance.",
+        "The rating visualization and weekly summary card use existing Tailwind/Shadcn styling patterns used elsewhere in the app.",
+        "All user-facing labels in the weekly summary are in English."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/graphs/WeeklyRatingScale.tsx",
+          "operation": "create",
+          "description": "Create a reusable weekly rating visualization component that displays a 1–10 score at a glance (e.g., segmented scale or star-like markers) using existing Tailwind patterns and composed shadcn/ui primitives (do not modify anything under frontend/src/components/ui)."
+        },
+        {
+          "path": "frontend/src/components/graphs/WeeklySummaryCard.tsx",
+          "operation": "modify",
+          "description": "Integrate WeeklyRatingScale into the Weekly Summary card to visually represent the computed 1–10 score alongside the numeric value, keeping styling consistent with other Dashboard cards."
+        }
+      ]
+    },
+    {
+      "id": "REQ-24",
+      "summary": "Generate weekly feedback using deterministic local rules referencing the user’s stored body goal (if available) and last-7-days logged data, with concrete suggestions and per-user correctness.",
+      "acceptanceCriteria": [
+        "Weekly feedback generation does not call any external services/APIs.",
+        "If the user has a body goal configured, the weekly feedback references it (e.g., “Lose Weight”, “Gain Muscle”) in English.",
+        "The app produces at least one concrete suggestion when the score is not high (e.g., suggest increasing protein if protein share is low), based only on logged data and simple rules.",
+        "The feature works per-user (no data leakage across principals)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/utils/weeklyFeedback.ts",
+          "operation": "modify",
+          "description": "Extend the deterministic rules to incorporate the current user’s body goal (from the already-loaded user profile) into the English feedback text and ensure at least one actionable suggestion is produced when the score is not high, derived only from last-7-days totals/ratios."
+        },
+        {
+          "path": "frontend/src/components/graphs/WeeklySummaryCard.tsx",
+          "operation": "modify",
+          "description": "Pass the current user’s body goal into the weekly feedback computation and render goal-referencing English text in the Weekly Summary UI. Ensure the component uses only the currently authenticated user’s entries/profile data already loaded on the Dashboard."
+        },
+        {
+          "path": "frontend/src/pages/DashboardPage.tsx",
+          "operation": "modify",
+          "description": "Wire the current user profile’s body goal (if available) into WeeklySummaryCard so the feedback references it and remains per-user (based on the caller-scoped entries returned by existing data hooks)."
         }
       ]
     }

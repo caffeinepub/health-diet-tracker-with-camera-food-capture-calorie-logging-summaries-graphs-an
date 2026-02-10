@@ -49,6 +49,16 @@ export default function EntryDetailsDialog({ entry, open, onClose }: EntryDetail
             </Badge>
           </div>
 
+          {entry.description && (
+            <>
+              <Separator />
+              <div>
+                <h4 className="text-sm font-semibold mb-2">Description</h4>
+                <p className="text-sm text-muted-foreground">{entry.description}</p>
+              </div>
+            </>
+          )}
+
           <Separator />
 
           <div className="space-y-3">

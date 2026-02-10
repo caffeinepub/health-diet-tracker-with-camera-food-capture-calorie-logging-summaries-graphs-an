@@ -60,7 +60,17 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   const { data: userProfile, isLoading: profileLoading, isFetched } = useGetCallerUserProfile();
 
   const isAuthenticated = !!identity;
-  const showProfileSetup = isAuthenticated && !profileLoading && isFetched && userProfile === null;
+  
+  // Check if profile is complete (has name and bodyGoal with all required fields)
+  const isProfileComplete = userProfile && 
+    userProfile.name && 
+    userProfile.bodyGoal &&
+    userProfile.bodyGoal.goalType &&
+    userProfile.bodyGoal.currentWeight > 0 &&
+    userProfile.bodyGoal.targetWeight > 0 &&
+    userProfile.bodyGoal.weeklyGoalSpeed > 0;
+  
+  const showProfileSetup = isAuthenticated && !profileLoading && isFetched && !isProfileComplete;
 
   if (isInitializing) {
     return (
@@ -77,12 +87,12 @@ function AuthGate({ children }: { children: React.ReactNode }) {
     return <LoginPage />;
   }
 
-  return (
-    <>
-      {children}
-      {showProfileSetup && <ProfileSetupDialog />}
-    </>
-  );
+  // Block app access until profile is complete
+  if (showProfileSetup) {
+    return <ProfileSetupDialog />;
+  }
+
+  return <>{children}</>;
 }
 
 export default function App() {

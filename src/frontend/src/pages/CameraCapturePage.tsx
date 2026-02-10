@@ -33,6 +33,11 @@ export default function CameraCapturePage() {
     quality: 0.9,
   });
 
+  // Auto-start camera on mount
+  useEffect(() => {
+    startCamera();
+  }, []);
+
   useEffect(() => {
     return () => {
       if (isActive) {
@@ -117,16 +122,18 @@ export default function CameraCapturePage() {
       {error && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            {error.message}
-            {error.type === 'permission' && ' Please allow camera access in your browser settings.'}
+          <AlertDescription className="flex items-center justify-between">
+            <span>
+              {error.message}
+              {error.type === 'permission' && ' Please allow camera access in your browser settings.'}
+            </span>
           </AlertDescription>
         </Alert>
       )}
 
       <Card>
         <CardContent className="p-6">
-          <div className="relative w-full aspect-[9/16] max-h-[70vh] bg-black rounded-lg overflow-hidden">
+          <div className="relative w-full aspect-[9/16] max-h-[70vh] min-h-[400px] bg-black rounded-lg overflow-hidden">
             <video
               ref={videoRef}
               autoPlay
@@ -144,23 +151,17 @@ export default function CameraCapturePage() {
               />
             )}
 
-            {!isActive && !isLoading && (
+            {!isActive && !isLoading && !error && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/50">
                 <div className="text-center text-white space-y-4">
                   <Camera className="w-16 h-16 mx-auto opacity-50" />
-                  <p>Camera is not active</p>
+                  <p>Initializing camera...</p>
                 </div>
               </div>
             )}
           </div>
 
           <div className="mt-6 flex gap-4 justify-center">
-            {!isActive && !error && (
-              <Button onClick={startCamera} disabled={isLoading} size="lg">
-                {isLoading ? 'Starting...' : 'Start Camera'}
-              </Button>
-            )}
-
             {error && (
               <Button onClick={retry} disabled={isLoading} size="lg">
                 <RotateCw className="w-4 h-4 mr-2" />

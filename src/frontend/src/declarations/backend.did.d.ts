@@ -10,32 +10,62 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
+export interface BodyGoalDetails {
+  'goalType' : GoalType,
+  'weeklyGoalSpeed' : number,
+  'targetWeight' : number,
+  'currentWeight' : number,
+}
+export type FeedbackType = { 'offBalance' : null } |
+  { 'goodJob' : null } |
+  { 'notEnoughData' : null } |
+  { 'overrange' : null } |
+  { 'underrange' : null } |
+  { 'partialFocus' : null };
 export interface FoodEntry {
   'id' : bigint,
   'day' : bigint,
   'owner' : Principal,
   'calories' : number,
+  'description' : string,
   'confidenceLevel' : number,
   'portionSize' : number,
   'micronutrients' : { 'fiber' : number, 'sodium' : number, 'sugar' : number },
   'macros' : { 'fat' : number, 'carbs' : number, 'protein' : number },
   'foodLabel' : string,
 }
+export type GoalType = { 'gainMuscle' : null } |
+  { 'maintain' : null } |
+  { 'gainWeight' : null } |
+  { 'loseWeight' : null };
 export interface QuestionSuggestion {
   'relatedQuestions' : Array<string>,
   'question' : string,
   'answer' : string,
   'citations' : Array<string>,
 }
-export interface UserProfile { 'name' : string }
+export interface UserProfile {
+  'name' : string,
+  'bodyGoal' : [] | [BodyGoalDetails],
+}
 export type UserRole = { 'admin' : null } |
   { 'user' : null } |
   { 'guest' : null };
+export interface WeeklyFeedback {
+  'totalCarbs' : number,
+  'feedbackType' : FeedbackType,
+  'avgCalories' : number,
+  'totalFat' : number,
+  'entriesChecked' : bigint,
+  'totalProtein' : number,
+  'entriesPerDay' : number,
+}
 export interface _SERVICE {
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
   'addFoodEntry' : ActorMethod<
     [
       bigint,
+      string,
       string,
       number,
       { 'fat' : number, 'carbs' : number, 'protein' : number },
@@ -52,8 +82,10 @@ export interface _SERVICE {
   'getPortionAdjusterGuidance' : ActorMethod<[], string>,
   'getSuggestedQuestions' : ActorMethod<[], Array<QuestionSuggestion>>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
+  'getWeeklyFeedback' : ActorMethod<[], WeeklyFeedback>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
+  'updateBodyGoal' : ActorMethod<[BodyGoalDetails], undefined>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

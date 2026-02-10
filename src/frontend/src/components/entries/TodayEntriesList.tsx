@@ -31,7 +31,12 @@ export default function TodayEntriesList({ entries }: TodayEntriesListProps) {
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <h4 className="font-semibold truncate">{entry.foodLabel}</h4>
-                  <p className="text-sm text-muted-foreground">
+                  {entry.description && (
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
+                      {entry.description}
+                    </p>
+                  )}
+                  <p className="text-sm text-muted-foreground mt-1">
                     {Math.round(adjustedCalories)} kcal
                   </p>
                 </div>

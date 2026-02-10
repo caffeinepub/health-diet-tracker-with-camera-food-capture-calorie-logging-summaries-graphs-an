@@ -1,24 +1,38 @@
 import Array "mo:core/Array";
 import Map "mo:core/Map";
 import Iter "mo:core/Iter";
-import Time "mo:core/Time";
-import Text "mo:core/Text";
-import Int "mo:core/Int";
-import Nat "mo:core/Nat";
-import Order "mo:core/Order";
-import Float "mo:core/Float";
 import Runtime "mo:core/Runtime";
-
 import Principal "mo:core/Principal";
+import Float "mo:core/Float";
+import Nat "mo:core/Nat";
+import Int "mo:core/Int";
+import Order "mo:core/Order";
+import Migration "migration";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 
+(with migration = Migration.run)
 actor {
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
 
+  public type BodyGoalDetails = {
+    goalType : GoalType;
+    currentWeight : Float;
+    targetWeight : Float;
+    weeklyGoalSpeed : Float;
+  };
+
+  public type GoalType = {
+    #loseWeight;
+    #gainWeight;
+    #gainMuscle;
+    #maintain;
+  };
+
   public type UserProfile = {
     name : Text;
+    bodyGoal : ?BodyGoalDetails;
   };
 
   type FoodEntry = {
@@ -26,6 +40,7 @@ actor {
     owner : Principal;
     day : Int;
     foodLabel : Text;
+    description : Text;
     calories : Float;
     macros : {
       protein : Float;
@@ -46,6 +61,25 @@ actor {
     answer : Text;
     citations : [Text];
     relatedQuestions : [Text];
+  };
+
+  type WeeklyFeedback = {
+    feedbackType : FeedbackType;
+    entriesChecked : Nat;
+    avgCalories : Float;
+    totalProtein : Float;
+    totalCarbs : Float;
+    totalFat : Float;
+    entriesPerDay : Float;
+  };
+
+  type FeedbackType = {
+    #overrange;
+    #underrange;
+    #offBalance;
+    #goodJob;
+    #partialFocus;
+    #notEnoughData;
   };
 
   module FoodEntry {
@@ -79,9 +113,26 @@ actor {
     userProfiles.add(caller, profile);
   };
 
+  public shared ({ caller }) func updateBodyGoal(details : BodyGoalDetails) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can update body goals");
+    };
+
+    switch (userProfiles.get(caller)) {
+      case (null) { Runtime.trap("User profile not found") };
+      case (?profile) {
+        let updatedProfile : UserProfile = {
+          profile with bodyGoal = ?details;
+        };
+        userProfiles.add(caller, updatedProfile);
+      };
+    };
+  };
+
   public shared ({ caller }) func addFoodEntry(
     day : Int,
     foodLabel : Text,
+    description : Text,
     calories : Float,
     macros : { protein : Float; carbs : Float; fat : Float },
     micronutrients : { fiber : Float; sodium : Float; sugar : Float },
@@ -98,6 +149,7 @@ actor {
       owner = caller;
       day;
       foodLabel;
+      description;
       calories;
       macros;
       micronutrients;
@@ -156,5 +208,144 @@ actor {
 
   public query ({ caller }) func getPortionAdjusterGuidance() : async Text {
     "Consider these when adjusting portions: typical serving size, cook method, packaging info, and visual comparisons. Use your best judgment - mark lower confidence if unsure.";
+  };
+
+  public query ({ caller }) func getWeeklyFeedback() : async WeeklyFeedback {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can get feedback");
+    };
+
+    switch (userProfiles.get(caller)) {
+      case (null) {
+        buildDefaultFeedback(
+          0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+        );
+      };
+      case (?profile) {
+        switch (profile.bodyGoal) {
+          case (null) {
+            buildDefaultFeedback(
+              0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+            );
+          };
+          case (?goal) {
+            let entries = foodEntries.values().toArray();
+            let daysRange = [(0 : Int), 1, 2, 3, 4, 5, 6];
+            var totalCalories : Float = 0.0;
+            var totalProtein : Float = 0.0;
+            var totalCarbs : Float = 0.0;
+            var totalFat : Float = 0.0;
+            var entriesChecked : Nat = 0;
+            var nonEmptyDays : Nat = 0;
+
+            for (day in daysRange.values()) {
+              let dailyEntries = entries.filter(
+                func(e) {
+                  e.owner == caller and e.day == day
+                }
+              );
+              let dailyCount = dailyEntries.size();
+
+              if (dailyCount > 0) {
+                nonEmptyDays += 1;
+              };
+
+              totalCalories += dailyEntries.foldLeft(
+                0.0,
+                func(acc, e) { acc + e.calories },
+              );
+
+              totalProtein += dailyEntries.foldLeft(
+                0.0,
+                func(acc, e) { acc + e.macros.protein },
+              );
+
+              totalCarbs += dailyEntries.foldLeft(
+                0.0,
+                func(acc, e) { acc + e.macros.carbs },
+              );
+
+              totalFat += dailyEntries.foldLeft(
+                0.0,
+                func(acc, e) { acc + e.macros.fat },
+              );
+
+              entriesChecked += dailyCount;
+            };
+
+            let avgCalories = if (nonEmptyDays > 0) {
+              totalCalories / nonEmptyDays.toFloat();
+            } else { 0.0 };
+
+            let avgEntriesPerDay = if (nonEmptyDays > 0) {
+              entriesChecked.toFloat() / nonEmptyDays.toFloat();
+            } else { 0.0 };
+
+            determineFeedbackType(
+              entriesChecked,
+              avgCalories,
+              totalProtein,
+              totalCarbs,
+              totalFat,
+              avgEntriesPerDay,
+            );
+          };
+        };
+      };
+    };
+  };
+
+  func buildDefaultFeedback(
+    entriesChecked : Nat,
+    avgCalories : Float,
+    totalProtein : Float,
+    totalCarbs : Float,
+    totalFat : Float,
+  ) : WeeklyFeedback {
+    {
+      feedbackType = #notEnoughData;
+      entriesChecked;
+      avgCalories;
+      totalProtein;
+      totalCarbs;
+      totalFat;
+      entriesPerDay = 0.0;
+    };
+  };
+
+  func determineFeedbackType(
+    entriesChecked : Nat,
+    avgCalories : Float,
+    totalProtein : Float,
+    totalCarbs : Float,
+    totalFat : Float,
+    entriesPerDay : Float,
+  ) : WeeklyFeedback {
+    let feedbackType : FeedbackType =
+      if (entriesChecked < 6) { #notEnoughData } else if (avgCalories > 1600.0 and avgCalories < 2400.0) {
+        #goodJob;
+      } else if (avgCalories > 1300.0 and avgCalories <= 1600.0) { #partialFocus } else if (
+        avgCalories > 2500.0
+      ) { #overrange } else if (avgCalories < 1300.0) { #underrange } else if (
+        totalCarbs > totalFat and totalCarbs > 220.0
+      ) { #offBalance } else { #notEnoughData };
+
+    {
+      feedbackType;
+      entriesChecked;
+      avgCalories;
+      totalProtein;
+      totalCarbs;
+      totalFat;
+      entriesPerDay;
+    };
   };
 };

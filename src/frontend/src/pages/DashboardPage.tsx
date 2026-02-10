@@ -1,8 +1,9 @@
 import { useState, useMemo } from 'react';
 import { useGetFoodEntries } from '../hooks/useFoodEntries';
+import { useGetCallerUserProfile } from '../hooks/useCurrentUserProfile';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar, Plus, TrendingUp } from 'lucide-react';
+import { Plus, TrendingUp, Camera, Target, TrendingDown, Activity } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
 import TodayEntriesList from '../components/entries/TodayEntriesList';
 import EmptyEntriesState from '../components/entries/EmptyEntriesState';
@@ -10,10 +11,43 @@ import DateRangePicker from '../components/entries/DateRangePicker';
 import CaloriesOverTimeChart from '../components/graphs/CaloriesOverTimeChart';
 import MacroDistributionChart from '../components/graphs/MacroDistributionChart';
 import NutritionBalanceRating from '../components/graphs/NutritionBalanceRating';
+import WeeklySummaryCard from '../components/graphs/WeeklySummaryCard';
+import { calculateWeeklySummary } from '../utils/weeklyFeedback';
+import { GoalType } from '@/backend';
 
 function getTodayDayNumber(): number {
   const now = new Date();
   return Math.floor(now.getTime() / (1000 * 60 * 60 * 24));
+}
+
+function getGoalTypeLabel(goalType: GoalType): string {
+  switch (goalType) {
+    case GoalType.loseWeight:
+      return 'Lose Weight';
+    case GoalType.gainWeight:
+      return 'Gain Weight';
+    case GoalType.gainMuscle:
+      return 'Gain Muscle';
+    case GoalType.maintain:
+      return 'Maintain Weight';
+    default:
+      return 'Unknown';
+  }
+}
+
+function getGoalIcon(goalType: GoalType) {
+  switch (goalType) {
+    case GoalType.loseWeight:
+      return TrendingDown;
+    case GoalType.gainWeight:
+      return TrendingUp;
+    case GoalType.gainMuscle:
+      return Activity;
+    case GoalType.maintain:
+      return Target;
+    default:
+      return Target;
+  }
 }
 
 export default function DashboardPage() {
@@ -23,9 +57,14 @@ export default function DashboardPage() {
   const [rangeStart, setRangeStart] = useState<number>(today - 6);
   const [rangeEnd, setRangeEnd] = useState<number>(today);
 
+  const { data: userProfile } = useGetCallerUserProfile();
   const { data: todayEntries = [], isLoading: todayLoading } = useGetFoodEntries(today, today);
   const { data: rangeEntries = [], isLoading: rangeLoading } = useGetFoodEntries(rangeStart, rangeEnd);
   const { data: selectedDayEntries = [] } = useGetFoodEntries(selectedDay, selectedDay);
+  
+  // Fetch last 7 days for weekly summary
+  const weeklyStart = today - 6;
+  const { data: weeklyEntries = [] } = useGetFoodEntries(weeklyStart, today);
 
   const todayTotals = useMemo(() => {
     return todayEntries.reduce(
@@ -46,6 +85,13 @@ export default function DashboardPage() {
     );
   }, [rangeEntries]);
 
+  const weeklySummary = useMemo(() => {
+    return calculateWeeklySummary(weeklyEntries, userProfile?.bodyGoal);
+  }, [weeklyEntries, userProfile?.bodyGoal]);
+
+  const bodyGoal = userProfile?.bodyGoal;
+  const GoalIcon = bodyGoal ? getGoalIcon(bodyGoal.goalType) : Target;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -53,11 +99,56 @@ export default function DashboardPage() {
           <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
           <p className="text-muted-foreground">Track your daily nutrition and progress</p>
         </div>
-        <Button onClick={() => navigate({ to: '/add-entry' })} size="lg">
-          <Plus className="w-4 h-4 mr-2" />
-          Add Entry
-        </Button>
+        <div className="flex gap-3">
+          <Button onClick={() => navigate({ to: '/camera' })} size="lg" variant="outline">
+            <Camera className="w-4 h-4 mr-2" />
+            Scan Food
+          </Button>
+          <Button onClick={() => navigate({ to: '/add-entry' })} size="lg">
+            <Plus className="w-4 h-4 mr-2" />
+            Add Entry
+          </Button>
+        </div>
       </div>
+
+      {bodyGoal && (
+        <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <GoalIcon className="w-5 h-5 text-primary" />
+              Your Body Goal
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div>
+                <div className="text-sm text-muted-foreground">Goal Type</div>
+                <div className="text-lg font-semibold">{getGoalTypeLabel(bodyGoal.goalType)}</div>
+              </div>
+              <div>
+                <div className="text-sm text-muted-foreground">Current Weight</div>
+                <div className="text-lg font-semibold">{bodyGoal.currentWeight} kg</div>
+              </div>
+              <div>
+                <div className="text-sm text-muted-foreground">Target Weight</div>
+                <div className="text-lg font-semibold">{bodyGoal.targetWeight} kg</div>
+              </div>
+              <div>
+                <div className="text-sm text-muted-foreground">Weekly Goal</div>
+                <div className="text-lg font-semibold">{bodyGoal.weeklyGoalSpeed} kg/week</div>
+              </div>
+            </div>
+            <div className="mt-4 pt-4 border-t border-primary/20">
+              <div className="text-sm text-muted-foreground">
+                Progress: {Math.abs(bodyGoal.targetWeight - bodyGoal.currentWeight).toFixed(1)} kg to go
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Weekly Summary */}
+      <WeeklySummaryCard summary={weeklySummary} />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>

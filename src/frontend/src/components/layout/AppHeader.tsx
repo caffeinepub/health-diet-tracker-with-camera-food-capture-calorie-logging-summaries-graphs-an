@@ -1,7 +1,7 @@
 import { useNavigate } from '@tanstack/react-router';
 import { useGetCallerUserProfile } from '../../hooks/useCurrentUserProfile';
 import { Button } from '@/components/ui/button';
-import { Leaf, LayoutDashboard, Plus, Camera, MessageCircle } from 'lucide-react';
+import { LayoutDashboard, Plus, Camera, MessageCircle } from 'lucide-react';
 import LoginButton from '../auth/LoginButton';
 
 export default function AppHeader() {
@@ -17,8 +17,12 @@ export default function AppHeader() {
               onClick={() => navigate({ to: '/' })}
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <Leaf className="w-6 h-6 text-primary" />
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
+                <img 
+                  src="/assets/generated/app-logo-s.dim_512x512.png" 
+                  alt="NutriScan Logo"
+                  className="w-full h-full object-cover"
+                />
               </div>
               <span className="text-xl font-bold">NutriScan</span>
             </button>
