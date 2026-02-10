@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 17,
+  "projectStateVersion": 19,
   "summary": "Calorieshivam health and diet tracking app with camera-based food scanning, daily calorie logging, summaries/graphs/ratings, in-app helper chat, local rules-based nutrition estimation with optional weight input, a one-time body-goal onboarding, plus BMI + maintenance-calorie (TDEE) calculations from user profile data (height/weight/age/etc.) with a persistent dashboard area showing whether daily intake is above/below/at maintenance; uses an aesthetic “S” logo across the app, and includes an Android (Play Store) build packaged from the existing web app via a WebView wrapper.",
   "architectural_notes": [
     "Requires device camera integration (back camera) for food scanning.",
@@ -306,6 +306,38 @@
         "REQ-40"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-update-the-android-wrapper-documentation-to-support-a-non-play-store-distribution-flow-sideload-including-clear-steps-to-build-a-release-apk-aab-where-to-set-the-production-canister-url-and-how-a-user-can-install-the-apk-on-an-android-device",
+      "title": "Update the Android wrapper documentation to support a non–Play Store distribution flow (sideload), including clear steps to build a release APK/AAB, where to set the production canister URL, and how a user can install the APK on an Android device.",
+      "reqIds": [
+        "REQ-41"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-android-wrapper-branding-consistency-so-the-installed-android-app-shows-the-correct-unique-user-facing-app-name-and-does-not-contain-leftover-internal-naming-e-g-the-current-theme-name-reference-ensure-the-android-wrapper-builds-successfully-after-the-change",
+      "title": "Fix Android wrapper branding consistency so the installed Android app shows the correct, unique user-facing app name and does not contain leftover internal naming (e.g., the current theme name reference). Ensure the Android wrapper builds successfully after the change.",
+      "reqIds": [
+        "REQ-42"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-small-in-web-install-app-entry-point-that-explains-in-english-how-to-get-the-android-app-build-sideload-and-what-it-is-a-packaged-version-of-the-web-app-this-should-reduce-confusion-for-users-who-expect-an-app-instead-of-a-website",
+      "title": "Add a small in-web “Install App” entry point that explains (in English) how to get the Android app build (sideload) and what it is (a packaged version of the web app). This should reduce confusion for users who expect an app instead of a website.",
+      "reqIds": [
+        "REQ-43"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-make-the-user-facing-app-display-name-configurable-from-a-single-place-for-both-the-web-app-header-login-tab-title-alt-text-and-the-android-wrapper-app-name-string-so-the-owner-can-choose-a-more-searchable-unique-name-without-hunting-through-multiple-files",
+      "title": "Make the user-facing app display name configurable from a single place for both the web app (header/login/tab title/alt text) and the Android wrapper (app_name string), so the owner can choose a more searchable unique name without hunting through multiple files.",
+      "reqIds": [
+        "REQ-44"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -447,6 +479,12 @@
       "reqIds": [
         "REQ-37"
       ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-24",
+      "summary": "Provide a standalone installable mobile app experience (at minimum an Android APK that can be installed outside the Play Store / sideload), and ensure the app identity/name is unique and discoverable vs the website",
+      "reqIds": [],
       "status": "pending"
     }
   ],

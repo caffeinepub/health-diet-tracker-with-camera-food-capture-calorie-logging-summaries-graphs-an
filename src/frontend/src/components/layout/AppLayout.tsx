@@ -1,13 +1,18 @@
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import AppHeader from './AppHeader';
 import { Toaster } from '@/components/ui/sonner';
 import { ThemeProvider } from 'next-themes';
+import { APP_DISPLAY_NAME } from '../../config/appBranding';
 
 interface AppLayoutProps {
   children: ReactNode;
 }
 
 export default function AppLayout({ children }: AppLayoutProps) {
+  useEffect(() => {
+    document.title = APP_DISPLAY_NAME;
+  }, []);
+
   return (
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
       <div className="min-h-screen bg-background">
@@ -18,7 +23,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
         <footer className="border-t mt-16">
           <div className="container mx-auto px-4 py-6 text-center text-sm text-muted-foreground">
             <p>
-              © {new Date().getFullYear()} Calorieshivam. Built with love using{' '}
+              © {new Date().getFullYear()} {APP_DISPLAY_NAME}. Built with love using{' '}
               <a
                 href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(
                   typeof window !== 'undefined' ? window.location.hostname : 'calorieshivam-app'

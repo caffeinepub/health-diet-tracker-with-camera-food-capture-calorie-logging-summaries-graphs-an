@@ -1,103 +1,125 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Add per-user BMI/TDEE UI and rename branding to Calorieshivam",
+  "title": "Android sideload distribution docs, branding consistency, and single-source display name configurability",
   "requirements": [
     {
-      "id": "REQ-38",
-      "summary": "Extend the post-login profile setup UI to collect height, age, sex, and activity level and persist them with the existing per-user profile.",
+      "id": "REQ-41",
+      "summary": "Update Android wrapper documentation for sideload distribution, including release build steps, production URL configuration, and end-user installation steps.",
       "acceptanceCriteria": [
-        "The profile setup UI includes inputs for height, age, sex, and activity level in addition to the existing name/body-goal fields.",
-        "Form validation prevents saving clearly invalid values (e.g., non-positive height/age).",
-        "Submitting the setup form persists the new fields along with the existing profile fields via the existing profile-save hook.",
-        "All user-facing text in the profile setup dialog is in English and does not reference old app names (e.g., remove/replace the existing “Welcome to NutriScan!” text)."
+        "`frontend/android-wrapper/README.md` contains an explicit section for sideload distribution (outside Play Store).",
+        "README includes the exact Gradle property to set for the production web URL (`nutriscan.baseUrl`) and an example value.",
+        "README includes steps to produce a release artifact (APK and/or AAB) using Android Studio and/or Gradle CLI.",
+        "README includes end-user installation steps for the generated APK (sideload), with any required device settings noted."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/auth/ProfileSetupDialog.tsx",
+          "path": "frontend/android-wrapper/README.md",
           "operation": "modify",
-          "description": "Add controlled inputs for height (cm), age, sex, and activity level, validate values (required + positive ranges), and include the new fields (heightCm, age, sex, activityLevel) when calling the existing useSaveCallerUserProfile mutation. Also update the dialog title/description to English branding-neutral copy (no “NutriScan”). Verify the component's usage instructions before implementing."
+          "description": "Rewrite/expand the documentation to include a dedicated “Sideload (Outside Play Store)” section: (1) how to set the production canister URL via the Gradle property `nutriscan.baseUrl` (include an explicit example value), (2) how to build signed/unsigned release artifacts (APK and AAB) via Android Studio and Gradle CLI, and (3) clear end-user sideload install steps (unknown sources/install unknown apps setting, locating the APK, install, and basic troubleshooting). Also remove/adjust Play Store-specific framing so sideload is a first-class flow."
+        }
+      ]
+    },
+    {
+      "id": "REQ-42",
+      "summary": "Fix Android wrapper branding consistency by aligning theme/style naming and ensuring the launcher label uses @string/app_name without build errors.",
+      "acceptanceCriteria": [
+        "Android wrapper still builds (debug and release) with no resource/theme resolution errors.",
+        "The launcher label shown on Android uses the user-facing app name from `@string/app_name` (currently \"Calorieshivam\") in `frontend/android-wrapper/app/src/main/res/values/strings.xml`.",
+        "Any internal Android theme/style naming that still references an old app name (e.g., `Theme.Calorieman`) is updated to be consistent, and `AndroidManifest.xml` references the updated theme correctly."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/android-wrapper/app/src/main/res/values/themes.xml",
+          "operation": "modify",
+          "description": "Rename the app theme/style away from leftover internal naming (e.g., change `Theme.Calorieman` to a consistent current theme name) while preserving the actual theme configuration items/colors, ensuring no resource resolution issues in debug/release builds."
+        },
+        {
+          "path": "frontend/android-wrapper/app/src/main/AndroidManifest.xml",
+          "operation": "modify",
+          "description": "Update the application theme reference to the renamed consistent theme, keeping the launcher label as `android:label=\"@string/app_name\"` and preserving technical identifiers (package name, resource keys) unless strictly necessary for build correctness."
+        },
+        {
+          "path": "frontend/android-wrapper/app/src/main/java/com/nutriscan/wrapper/MainActivity.kt",
+          "operation": "modify",
+          "description": "Update any leftover internal naming references in comments/strings (e.g., references to an old app name) to be consistent with the current wrapper/web-app naming, without changing technical identifiers or runtime behavior."
+        }
+      ]
+    },
+    {
+      "id": "REQ-43",
+      "summary": "Add an in-web “Install App” entry point with English instructions explaining the Android sideload app and where the APK comes from.",
+      "acceptanceCriteria": [
+        "The web UI has a visible “Install App” link/button accessible to logged-out users (e.g., on the Login page) and/or logged-in users (e.g., in the header or settings/help area).",
+        "Clicking “Install App” opens a page/section/modal with concise English instructions for Android installation (sideload) and a pointer to where the APK comes from (repository build artifact / provided APK).",
+        "All user-facing text added for this feature is in English."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/InstallAppPage.tsx",
+          "operation": "create",
+          "description": "Create an “Install App” page with concise English text explaining: the Android app is a packaged WebView version of the web app, how users obtain the APK (provided by the owner/repository build artifact), and high-level sideload steps (enable install unknown apps, install APK, open app). Use existing UI primitives by composing (do not modify files under `frontend/src/components/ui`)."
         },
         {
           "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Update the profile-completeness gating logic so the post-login setup flow continues until the required BMI/TDEE inputs (heightCm, age, sex, activityLevel) are present in addition to existing name/bodyGoal checks. Verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-39",
-      "summary": "Add a persistent Maintenance Calories (TDEE) + BMI dashboard section that reacts to today’s entries and prompts for missing profile inputs.",
-      "acceptanceCriteria": [
-        "Dashboard shows a clearly visible card/section with TDEE (maintenance calories) and BMI for logged-in users.",
-        "The section indicates Above/Below/At maintenance based on today’s total calories vs TDEE, including the difference in kcal.",
-        "If the user profile lacks required fields for calculation, the section renders an English call-to-action message instead of broken/blank values.",
-        "The section updates correctly as today’s entries change (reactive to existing today totals)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/hooks/useCallerHealthMetrics.ts",
-          "operation": "create",
-          "description": "Create a React Query hook that calls the backend capability actor.getCallerHealthMetrics and caches the result for the authenticated user; ensure it is enabled only when the actor is available. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/dashboard/MaintenanceCaloriesCard.tsx",
-          "operation": "create",
-          "description": "Create a dashboard card component that displays: TDEE, today’s consumed calories, Above/Below/At maintenance with kcal difference, and BMI with category label. If required profile fields are missing, render an English prompt listing which fields are needed (derive missing fields from the current UserProfile shape). Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/pages/DashboardPage.tsx",
-          "operation": "modify",
-          "description": "Wire the new MaintenanceCaloriesCard into the dashboard in a clearly visible location for logged-in users; pass today’s total calories (existing memoized totals) and the current user profile; integrate the useCallerHealthMetrics hook for BMI/TDEE display and keep the card reactive as todayEntries change. Verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-40",
-      "summary": "Rename all user-facing branding to “Calorieshivam” across the web app UI and Android wrapper without changing technical identifiers.",
-      "acceptanceCriteria": [
-        "Web app header brand text displays “Calorieshivam”.",
-        "Login page displays “Calorieshivam” and any logo alt text reflects the new name.",
-        "Browser tab title in `frontend/index.html` uses “Calorieshivam” and keeps the rest of the title text in English.",
-        "Footer text no longer references “Calorieman” and uses “Calorieshivam”.",
-        "Android wrapper `app_name` string is “Calorieshivam” and wrapper README heading/content references “Calorieshivam” where it is a user-facing app name.",
-        "No required build changes rename technical identifiers like the Android package (`com/nutriscan/wrapper`) unless needed to compile."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/layout/AppHeader.tsx",
-          "operation": "modify",
-          "description": "Update the header brand label text to “Calorieshivam” and update the logo image alt text to reflect the new name. Verify the component's usage instructions before implementing."
+          "description": "Register and wire the new `/install-app` route so it is reachable via navigation, ensuring it is accessible when the user is logged out (i.e., not blocked behind the authenticated router)."
         },
         {
           "path": "frontend/src/pages/LoginPage.tsx",
           "operation": "modify",
-          "description": "Update login page title text to “Calorieshivam” and update the logo image alt text to “Calorieshivam”; ensure all user-facing strings remain English. Verify the component's usage instructions before implementing."
+          "description": "Add a visible “Install App” link/button (English text) for logged-out users that navigates to the new `/install-app` page, using existing composed UI components (do not modify `frontend/src/components/ui`)."
+        },
+        {
+          "path": "frontend/src/components/layout/AppHeader.tsx",
+          "operation": "modify",
+          "description": "Add an “Install App” navigation entry for logged-in users (English label) that routes to `/install-app`, without changing any read-only UI component implementations under `frontend/src/components/ui`."
+        }
+      ]
+    },
+    {
+      "id": "REQ-44",
+      "summary": "Make the user-facing display name configurable from a single place for the web UI, and document the single change-point for both web display name and Android app_name.",
+      "acceptanceCriteria": [
+        "There is one documented place to change the display name for the web app, and all existing UI locations update accordingly (header brand label, login title, image alt text, browser tab title).",
+        "There is one documented place to change the display name for the Android wrapper (`app_name`) and it is referenced consistently as the launcher label.",
+        "Documentation explicitly states that technical identifiers (e.g., Android package name `com.nutriscan.wrapper`, resource key `nutriscan_base_url`) must remain unchanged unless required for build correctness."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/config/appBranding.ts",
+          "operation": "create",
+          "description": "Add a single-source web branding configuration (e.g., exported constants for app display name and logo alt text) to be used across the web UI and for setting the browser tab title."
+        },
+        {
+          "path": "frontend/src/components/layout/AppHeader.tsx",
+          "operation": "modify",
+          "description": "Replace hard-coded brand text and logo alt text with values from `frontend/src/config/appBranding.ts` so changing one place updates the header brand label and alt text."
+        },
+        {
+          "path": "frontend/src/pages/LoginPage.tsx",
+          "operation": "modify",
+          "description": "Replace hard-coded login title and logo alt text with values from `frontend/src/config/appBranding.ts` so changing one place updates the login view branding."
         },
         {
           "path": "frontend/src/components/layout/AppLayout.tsx",
           "operation": "modify",
-          "description": "Update the footer copyright line to “Calorieshivam” and ensure it no longer references “Calorieman”; keep the rest of the footer English. Verify the component's usage instructions before implementing."
+          "description": "Set/update the browser tab title based on the single-source value from `frontend/src/config/appBranding.ts` (e.g., via a layout-level effect) so it stays consistent across the app."
         },
         {
           "path": "frontend/index.html",
           "operation": "modify",
-          "description": "Update the browser tab title to start with “Calorieshivam” while keeping the rest of the title text in English."
+          "description": "Adjust the initial static HTML <title> to a generic/compatible base title that is then overridden at runtime by the app branding configuration, ensuring no user-facing text conflicts with the configured display name."
         },
         {
           "path": "frontend/android-wrapper/app/src/main/res/values/strings.xml",
           "operation": "modify",
-          "description": "Change the user-facing app_name string to “Calorieshivam”; update any user-facing comments that mention the old app name while keeping technical keys (e.g., nutriscan_base_url) unchanged."
+          "description": "Ensure the Android user-facing app name remains controlled from a single place (`@string/app_name`) and keep the launcher label consistent with it; update comments if needed to clarify what is safe to change vs. what must remain unchanged."
         },
         {
           "path": "frontend/android-wrapper/README.md",
           "operation": "modify",
-          "description": "Update README heading and user-facing references from “Calorieman” to “Calorieshivam” (do not rename technical identifiers unless required for build correctness)."
-        },
-        {
-          "path": "frontend/android-wrapper/settings.gradle",
-          "operation": "modify",
-          "description": "Update the Android wrapper rootProject.name to “Calorieshivam” to match the user-facing wrapper name (keep package/applicationId unchanged)."
+          "description": "Add a “Branding / App Name Configuration” section documenting: (1) the single web change-point (`frontend/src/config/appBranding.ts`) and which UI locations it controls (header/login/title/alt text), (2) the single Android change-point (`frontend/android-wrapper/app/src/main/res/values/strings.xml` `app_name`) and that `AndroidManifest.xml` uses `@string/app_name`, and (3) an explicit note that technical identifiers (Android package name, resource keys like `nutriscan_base_url`, and Gradle property key `nutriscan.baseUrl`) must remain unchanged unless required for build correctness."
         }
       ]
     }

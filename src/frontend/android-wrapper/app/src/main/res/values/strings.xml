@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- 
+        User-facing app name shown on Android launcher.
+        Change this value to update the app name displayed to users.
+        This does NOT change the package name (com.nutriscan.wrapper) or other technical identifiers.
+    -->
     <string name="app_name">Calorieshivam</string>
     
-    <!-- Base URL for the Calorieshivam web app - configured via Gradle -->
+    <!-- 
+        Base URL for the web app - configured via Gradle property nutriscan.baseUrl
+        Technical identifier (nutriscan_base_url) must remain unchanged for build compatibility.
+    -->
     <string name="nutriscan_base_url">NUTRISCAN_BASE_URL_PLACEHOLDER</string>
 </resources>

@@ -7,6 +7,7 @@ import AddEntryPage from './pages/AddEntryPage';
 import CameraCapturePage from './pages/CameraCapturePage';
 import HelperChatPage from './pages/HelperChatPage';
 import LoginPage from './pages/LoginPage';
+import InstallAppPage from './pages/InstallAppPage';
 import ProfileSetupDialog from './components/auth/ProfileSetupDialog';
 
 function RootLayout() {
@@ -45,7 +46,13 @@ const chatRoute = createRoute({
   component: HelperChatPage,
 });
 
-const routeTree = rootRoute.addChildren([indexRoute, addEntryRoute, cameraRoute, chatRoute]);
+const installAppRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/install-app',
+  component: InstallAppPage,
+});
+
+const routeTree = rootRoute.addChildren([indexRoute, addEntryRoute, cameraRoute, chatRoute, installAppRoute]);
 
 const router = createRouter({ routeTree });
 

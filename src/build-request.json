@@ -1,114 +1,92 @@
 {
   "kind": "build_request",
-  "title": "Add BMI + maintenance calories (TDEE) per user and rename app to Calorieshivam",
+  "title": "Deliver a true installable Android app experience (sideloadable) and improve app-name uniqueness configurability",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-36",
-      "text": "Extend the per-user profile data model to store the additional fields required to compute BMI and maintenance calories (TDEE), including at minimum: height, age, sex, and activity level, while preserving existing fields (name, bodyGoal) and keeping data isolated per Internet Identity principal.",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "add bmi and other things also a maintenance calorie for every user should be provided by their height weight age and everything the login data"
-        ]
-      },
-      "acceptanceCriteria": [
-        "The backend UserProfile type includes new fields sufficient to compute BMI and TDEE (height, age, sex, activity level) without removing existing fields.",
-        "Existing profile save/load endpoints continue to work for users who already have a stored profile (new fields are optional or have safe defaults).",
-        "All profile reads/writes remain authorized and scoped to the caller principal as before."
-      ]
-    },
-    {
-      "id": "REQ-37",
-      "text": "Add backend logic to compute BMI and maintenance calories (TDEE) deterministically from the caller’s stored profile data, and expose it via a dedicated query API that the frontend can call (e.g., `getCallerHealthMetrics`). Include computed values at minimum: BMI, BMI category label, BMR, and TDEE (maintenance calories).",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "a maintenance calorie for every user should be provided by their height weight age and everything the login data"
-        ]
-      },
-      "acceptanceCriteria": [
-        "A new backend query returns computed health metrics for the authenticated caller based on stored profile fields.",
-        "If required profile inputs are missing, the backend query returns a structured response indicating what’s missing (and does not trap).",
-        "No external APIs/services are used; computations are fully local and deterministic."
-      ]
-    },
-    {
-      "id": "REQ-38",
-      "text": "Update the post-login profile setup flow to collect the additional profile fields needed for BMI and maintenance calorie calculation (height, age, sex, activity level) and persist them to the backend as part of the caller’s profile.",
+      "id": "REQ-41",
+      "text": "Update the Android wrapper documentation to support a non–Play Store distribution flow (sideload), including clear steps to build a release APK/AAB, where to set the production canister URL, and how a user can install the APK on an Android device.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-6"
         ],
         "quotes": [
-          "provided by their height weight age and everything the login data"
+          "Though it may not be on play store, but please make it an app. I want an app."
         ]
       },
       "acceptanceCriteria": [
-        "The profile setup UI includes inputs for height, age, sex, and activity level in addition to the existing name/body-goal fields.",
-        "Form validation prevents saving clearly invalid values (e.g., non-positive height/age).",
-        "Submitting the setup form persists the new fields along with the existing profile fields via the existing profile-save hook.",
-        "All user-facing text in the profile setup dialog is in English and does not reference old app names (e.g., remove/replace the existing “Welcome to NutriScan!” text)."
+        "`frontend/android-wrapper/README.md` contains an explicit section for sideload distribution (outside Play Store).",
+        "README includes the exact Gradle property to set for the production web URL (`nutriscan.baseUrl`) and an example value.",
+        "README includes steps to produce a release artifact (APK and/or AAB) using Android Studio and/or Gradle CLI.",
+        "README includes end-user installation steps for the generated APK (sideload), with any required device settings noted."
       ]
     },
     {
-      "id": "REQ-39",
-      "text": "Add a persistent “Maintenance Calories” area on the Dashboard that is visible whenever the user is logged in and shows: (1) the user’s maintenance calories (TDEE), (2) today’s consumed calories, (3) whether today is above/below/equal to maintenance (with the numeric difference), and (4) the user’s BMI with a simple category label. If the profile is missing required inputs, show an English prompt telling the user which profile fields are needed.",
+      "id": "REQ-42",
+      "text": "Fix Android wrapper branding consistency so the installed Android app shows the correct, unique user-facing app name and does not contain leftover internal naming (e.g., the current theme name reference). Ensure the Android wrapper builds successfully after the change.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-6"
         ],
         "quotes": [
-          "provide a maintain maintenance calorie area at the dashboard available all the time by the login data"
+          "So make it unique and Make it an app."
         ]
       },
       "acceptanceCriteria": [
-        "Dashboard shows a clearly visible card/section with TDEE (maintenance calories) and BMI for logged-in users.",
-        "The section indicates Above/Below/At maintenance based on today’s total calories vs TDEE, including the difference in kcal.",
-        "If the user profile lacks required fields for calculation, the section renders an English call-to-action message instead of broken/blank values.",
-        "The section updates correctly as today’s entries change (reactive to existing today totals)."
+        "Android wrapper still builds (debug and release) with no resource/theme resolution errors.",
+        "The launcher label shown on Android uses the user-facing app name from `@string/app_name` (currently \"Calorieshivam\") in `frontend/android-wrapper/app/src/main/res/values/strings.xml`.",
+        "Any internal Android theme/style naming that still references an old app name (e.g., `Theme.Calorieman`) is updated to be consistent, and `AndroidManifest.xml` references the updated theme correctly."
       ]
     },
     {
-      "id": "REQ-40",
-      "text": "Rename the app/website user-facing name to “Calorieshivam” across the web app and Android wrapper, updating all visible branding strings (header brand label, login page title, image alt text, footer copyright, browser tab title) and Android wrapper user-facing name and documentation headings. Keep technical identifiers (e.g., Android package name, variable/resource keys like `nutriscan_base_url`) unchanged unless strictly necessary for build correctness.",
-      "target": "both",
+      "id": "REQ-43",
+      "text": "Add a small in-web “Install App” entry point that explains (in English) how to get the Android app build (sideload) and what it is (a packaged version of the web app). This should reduce confusion for users who expect an app instead of a website.",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-6"
         ],
         "quotes": [
-          "Change the app or website name to calorieshivam."
+          "Please make this an app. Website is very much Drainable. People will confuse"
         ]
       },
       "acceptanceCriteria": [
-        "Web app header brand text displays “Calorieshivam”.",
-        "Login page displays “Calorieshivam” and any logo alt text reflects the new name.",
-        "Browser tab title in `frontend/index.html` uses “Calorieshivam” and keeps the rest of the title text in English.",
-        "Footer text no longer references “Calorieman” and uses “Calorieshivam”.",
-        "Android wrapper `app_name` string is “Calorieshivam” and wrapper README heading/content references “Calorieshivam” where it is a user-facing app name.",
-        "No required build changes rename technical identifiers like the Android package (`com/nutriscan/wrapper`) unless needed to compile."
+        "The web UI has a visible “Install App” link/button accessible to logged-out users (e.g., on the Login page) and/or logged-in users (e.g., in the header or settings/help area).",
+        "Clicking “Install App” opens a page/section/modal with concise English instructions for Android installation (sideload) and a pointer to where the APK comes from (repository build artifact / provided APK).",
+        "All user-facing text added for this feature is in English."
+      ]
+    },
+    {
+      "id": "REQ-44",
+      "text": "Make the user-facing app display name configurable from a single place for both the web app (header/login/tab title/alt text) and the Android wrapper (app_name string), so the owner can choose a more searchable unique name without hunting through multiple files.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-6"
+        ],
+        "quotes": [
+          "Though my name is unique Kailash Shivam, but people may not be able to search it. So make it unique"
+        ]
+      },
+      "acceptanceCriteria": [
+        "There is one documented place to change the display name for the web app, and all existing UI locations update accordingly (header brand label, login title, image alt text, browser tab title).",
+        "There is one documented place to change the display name for the Android wrapper (`app_name`) and it is referenced consistently as the launcher label.",
+        "Documentation explicitly states that technical identifiers (e.g., Android package name `com.nutriscan.wrapper`, resource key `nutriscan_base_url`) must remain unchanged unless required for build correctness."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single Motoko actor with all logic in backend/main.mo; add migration.mo only if an upgrade-safe state migration is actually required.",
-    "Do not edit files under frontend/src/components/ui (read-only shadcn components); compose them instead.",
-    "Do not edit immutable hook/entry files listed in SYSTEM_CONTEXT (e.g., frontend/src/hooks/useInternetIdentity.ts(x), frontend/src/hooks/useActor.ts, frontend/src/main.tsx).",
-    "Use English for all user-facing UI strings."
+    "Do not modify files under `frontend/src/components/ui` (read-only UI components); compose them instead.",
+    "Keep all backend logic in the single Motoko actor (`backend/main.mo`); no new backend canisters/services.",
+    "Keep technical identifiers (e.g., Android package name, resource keys like `nutriscan_base_url`) unchanged unless strictly necessary for build correctness.",
+    "Use English for all user-facing text added or updated."
   ],
   "nonGoals": [
-    "Adding external health APIs or third-party services for BMI/TDEE computation.",
-    "Adding paid features, subscriptions, or notifications.",
-    "Changing Android package name / applicationId or canister IDs as part of the rename."
+    "Building an iOS app wrapper.",
+    "Publishing to the Google Play Store (the goal is an installable app experience even without Play Store).",
+    "Adding new backend features unrelated to packaging/branding/configurability."
   ],
   "imageRequirements": {
     "required": [],

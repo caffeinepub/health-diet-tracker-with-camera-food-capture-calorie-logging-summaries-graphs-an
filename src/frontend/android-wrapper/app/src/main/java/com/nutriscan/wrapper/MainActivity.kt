@@ -9,6 +9,18 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
+/**
+ * Main activity for the Calorieshivam Android wrapper.
+ * 
+ * This activity hosts a WebView that loads the web application with:
+ * - Internet Identity authentication support (popup/redirect handling)
+ * - Camera permission handling for food scanning
+ * - Secure HTTPS-only communication
+ * - Proper back button navigation
+ * - Offline error handling
+ * 
+ * Technical identifiers (package name, resource keys) remain unchanged for build compatibility.
+ */
 class MainActivity : AppCompatActivity() {
     private lateinit var webView: WebView
     private var cameraPermissionCallback: ValueCallback<Array<Uri>>? = null
@@ -21,7 +33,7 @@ class MainActivity : AppCompatActivity() {
         webView = findViewById(R.id.webview)
         setupWebView()
         
-        // Load the configured Calorieman URL
+        // Load the configured web app URL
         val baseUrl = getString(R.string.nutriscan_base_url)
         webView.loadUrl(baseUrl)
     }

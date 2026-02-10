@@ -1,36 +1,66 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-10T10:13:59.017Z",
-  "summary": "Most requested features are present: backend profile model extended with optional health fields plus migration; frontend profile setup collects and saves those fields; dashboard adds a MaintenanceCaloriesCard and a hook to fetch computed health metrics; branding updated to “Calorieshivam” across web and Android wrapper. The main gap is REQ-37’s requirement that the health-metrics query return a structured “missing inputs” response instead of trapping—current backend logic appears to trap on missing fields, and the frontend hook anticipates traps.",
+  "generatedAt": "2026-02-10T10:26:22.843Z",
+  "summary": "Diff implements centralized web branding config, adds an in-web Install App entry point/page, and updates Android wrapper resources/manifest toward consistent branding. However, the Android wrapper README is truncated in the diff summary so key sideload/Gradle-property/build/install instructions cannot be confirmed, and the browser tab title for logged-out users likely remains the static index.html title because AppLayout (which sets document.title) is only used inside the authenticated router.",
   "missing_requirements": [
     {
-      "id": "REQ-37",
-      "requirement": "Backend health-metrics query should return a structured response indicating which required profile inputs are missing (and must not trap) when profile data is incomplete.",
-      "reason": "The new backend API `getCallerHealthMetrics` and its helper appear to call `Runtime.trap` when the profile is missing or individual fields are missing (e.g., missing height/weight). This violates the acceptance criterion requiring a structured, non-trapping response for missing inputs. The frontend hook also contains a comment indicating the backend will trap, suggesting no structured missing-field response was implemented.",
+      "id": "REQ-41",
+      "requirement": "Update Android wrapper documentation for non–Play Store (sideload) distribution, including: explicit sideload section, exact Gradle property `nutriscan.baseUrl` with example, steps to build a release APK/AAB, and end-user APK installation steps.",
+      "reason": "The README diff is truncated right after 'Edit `gradle.properties`:' and does not show the required Gradle property (`nutriscan.baseUrl`) example, release build commands/Android Studio steps, or end-user sideload installation steps; cannot verify they were added.",
       "evidence": [
-        "backend/main.mo",
-        "frontend/src/hooks/useCallerHealthMetrics.ts"
+        "frontend/android-wrapper/README.md"
+      ]
+    },
+    {
+      "id": "REQ-44",
+      "requirement": "Single place to change the display name for the web app, updating all existing UI locations including browser tab title (including on the login page).",
+      "reason": "The tab title in `frontend/index.html` remains 'Nutrition Tracker', and the code that sets `document.title` is in `AppLayout`, which is only rendered inside the router (authenticated flow). When logged out, `AuthGate` returns `LoginPage` directly, so the tab title likely does not update to the configured display name for logged-out users.",
+      "evidence": [
+        "frontend/index.html",
+        "frontend/src/components/layout/AppLayout.tsx",
+        "frontend/src/App.tsx"
       ]
     }
   ],
-  "hallucinated_features": [],
-  "confidence": 0.74,
+  "hallucinated_features": [
+    {
+      "description": "Added web marketing-style branding fields (tagline/description) and updated login UI copy to use them.",
+      "reason": "BuildRequest only asked for a configurable display name and an Install App entry point; tagline/description centralization and new marketing copy are not explicitly requested.",
+      "evidence": [
+        "frontend/src/config/appBranding.ts",
+        "frontend/src/pages/LoginPage.tsx"
+      ]
+    },
+    {
+      "description": "Added/changed footer content including an external 'caffeine.ai' attribution link with UTM parameters.",
+      "reason": "Not requested by any requirement and unrelated to Android sideloading or name configurability.",
+      "evidence": [
+        "frontend/src/components/layout/AppLayout.tsx"
+      ]
+    },
+    {
+      "description": "Expanded authentication gating logic with profile completeness checks and a forced profile setup dialog flow.",
+      "reason": "Not part of packaging/branding/configurability requirements; appears as additional product functionality beyond the requested scope.",
+      "evidence": [
+        "frontend/src/App.tsx"
+      ]
+    }
+  ],
+  "confidence": 0.72,
   "changed_files": [
-    "backend/main.mo",
-    "backend/migration.mo",
     "frontend-file-summaries.txt",
     "frontend/android-wrapper/README.md",
+    "frontend/android-wrapper/app/src/main/AndroidManifest.xml",
+    "frontend/android-wrapper/app/src/main/java/com/nutriscan/wrapper/MainActivity.kt",
     "frontend/android-wrapper/app/src/main/res/values/strings.xml",
-    "frontend/android-wrapper/settings.gradle",
+    "frontend/android-wrapper/app/src/main/res/values/themes.xml",
     "frontend/index.html",
     "frontend/src/App.tsx",
-    "frontend/src/components/auth/ProfileSetupDialog.tsx",
-    "frontend/src/components/dashboard/MaintenanceCaloriesCard.tsx",
     "frontend/src/components/layout/AppHeader.tsx",
     "frontend/src/components/layout/AppLayout.tsx",
-    "frontend/src/hooks/useCallerHealthMetrics.ts",
-    "frontend/src/pages/DashboardPage.tsx",
+    "frontend/src/config/appBranding.ts",
+    "frontend/src/pages/InstallAppPage.tsx",
     "frontend/src/pages/LoginPage.tsx",
     "project_state.json"
   ]

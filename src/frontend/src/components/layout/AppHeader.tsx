@@ -1,8 +1,9 @@
 import { useNavigate } from '@tanstack/react-router';
 import { useGetCallerUserProfile } from '../../hooks/useCurrentUserProfile';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, Plus, Camera, MessageCircle } from 'lucide-react';
+import { LayoutDashboard, Plus, Camera, MessageCircle, Smartphone } from 'lucide-react';
 import LoginButton from '../auth/LoginButton';
+import { APP_DISPLAY_NAME } from '../../config/appBranding';
 
 export default function AppHeader() {
   const navigate = useNavigate();
@@ -20,11 +21,11 @@ export default function AppHeader() {
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
                 <img 
                   src="/assets/generated/app-logo-s.dim_512x512.png" 
-                  alt="Calorieshivam Logo"
+                  alt={`${APP_DISPLAY_NAME} Logo`}
                   className="w-full h-full object-cover"
                 />
               </div>
-              <span className="text-xl font-bold">Calorieshivam</span>
+              <span className="text-xl font-bold">{APP_DISPLAY_NAME}</span>
             </button>
 
             <nav className="hidden md:flex items-center gap-2">
@@ -59,6 +60,14 @@ export default function AppHeader() {
               >
                 <MessageCircle className="w-4 h-4" />
                 Helper
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => navigate({ to: '/install-app' })}
+                className="gap-2"
+              >
+                <Smartphone className="w-4 h-4" />
+                Install App
               </Button>
             </nav>
           </div>

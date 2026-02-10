@@ -1,6 +1,6 @@
 # Calorieshivam Android Wrapper
 
-This directory contains an Android WebView wrapper that packages the Calorieshivam web app for distribution on the Google Play Store.
+This directory contains an Android WebView wrapper that packages the Calorieshivam web app as an installable Android application.
 
 ## Overview
 
@@ -17,20 +17,15 @@ The wrapper loads the Calorieshivam web application in a full-screen WebView wit
 - JDK 8 or higher
 - Android SDK with API level 24+ (Android 7.0+)
 
-## Quick Start
+---
 
-### 1. Open in Android Studio
+## Sideload Distribution (Outside Play Store)
 
-1. Launch Android Studio
-2. Select "Open an Existing Project"
-3. Navigate to `frontend/android-wrapper` and click "OK"
-4. Wait for Gradle sync to complete
+This section explains how to build and distribute the app as an APK for installation outside the Google Play Store.
 
-### 2. Configure Your Production URL
+### 1. Configure Production URL
 
-Before building, you **must** configure the Calorieshivam base URL:
+Before building, you **must** configure the production web app URL.
 
-**Option A: Edit `gradle.properties`**
-
-Edit `gradle.properties` and set:
+**Edit `gradle.properties`:**
 

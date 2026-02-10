@@ -2,58 +2,54 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-the-post-login-profile-setup-flow-to-collect-the-additional-profile-fields-needed-for-bmi-and-maintenance-calorie-calculation-height-age-sex-activity-level-and-persist-them-to-the-backend-as-part-of-the-caller-s-profile",
-      "featureTitle": "Update the post-login profile setup flow to collect the additional profile fields needed for BMI and maintenance calorie calculation (height, age, sex, activity level) and persist them to the backend as part of the caller’s profile.",
+      "featureId": "feature-update-the-android-wrapper-documentation-to-support-a-non-play-store-distribution-flow-sideload-including-clear-steps-to-build-a-release-apk-aab-where-to-set-the-production-canister-url-and-how-a-user-can-install-the-apk-on-an-android-device",
+      "featureTitle": "Update the Android wrapper documentation to support a non–Play Store distribution flow (sideload), including clear steps to build a release APK/AAB, where to set the production canister URL, and how a user can install the APK on an Android device.",
+      "files": [
+        "frontend/android-wrapper/README.md"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "camera@1.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-41"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-fix-android-wrapper-branding-consistency-so-the-installed-android-app-shows-the-correct-unique-user-facing-app-name-and-does-not-contain-leftover-internal-naming-e-g-the-current-theme-name-reference-ensure-the-android-wrapper-builds-successfully-after-the-change",
+      "featureTitle": "Fix Android wrapper branding consistency so the installed Android app shows the correct, unique user-facing app name and does not contain leftover internal naming (e.g., the current theme name reference). Ensure the Android wrapper builds successfully after the change.",
+      "files": [
+        "frontend/android-wrapper/app/src/main/AndroidManifest.xml",
+        "frontend/android-wrapper/app/src/main/java/com/nutriscan/wrapper/MainActivity.kt",
+        "frontend/android-wrapper/app/src/main/res/values/themes.xml"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "camera@1.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-42"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-a-small-in-web-install-app-entry-point-that-explains-in-english-how-to-get-the-android-app-build-sideload-and-what-it-is-a-packaged-version-of-the-web-app-this-should-reduce-confusion-for-users-who-expect-an-app-instead-of-a-website",
+      "featureTitle": "Add a small in-web “Install App” entry point that explains (in English) how to get the Android app build (sideload) and what it is (a packaged version of the web app). This should reduce confusion for users who expect an app instead of a website.",
       "files": [
         "frontend/src/App.tsx",
-        "frontend/src/components/auth/ProfileSetupDialog.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "camera@1.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-38"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-a-persistent-maintenance-calories-area-on-the-dashboard-that-is-visible-whenever-the-user-is-logged-in-and-shows-1-the-user-s-maintenance-calories-tdee-2-today-s-consumed-calories-3-whether-today-is-above-below-equal-to-maintenance-with-the-numeric-difference-and-4-the-user-s-bmi-with-a-simple-category-label-if-the-profile-is-missing-required-inputs-show-an-english-prompt-telling-the-user-which-profile-fields-are-needed",
-      "featureTitle": "Add a persistent “Maintenance Calories” area on the Dashboard that is visible whenever the user is logged in and shows: (1) the user’s maintenance calories (TDEE), (2) today’s consumed calories, (3) whether today is above/below/equal to maintenance (with the numeric difference), and (4) the user’s BMI with a simple category label. If the profile is missing required inputs, show an English prompt telling the user which profile fields are needed.",
-      "files": [
-        "frontend/src/components/dashboard/MaintenanceCaloriesCard.tsx",
-        "frontend/src/hooks/useCallerHealthMetrics.ts",
-        "frontend/src/pages/DashboardPage.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "camera@1.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-39"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-rename-the-app-website-user-facing-name-to-calorieshivam-across-the-web-app-and-android-wrapper-updating-all-visible-branding-strings-header-brand-label-login-page-title-image-alt-text-footer-copyright-browser-tab-title-and-android-wrapper-user-facing-name-and-documentation-headings-keep-technical-identifiers-e-g-android-package-name-variable-resource-keys-like-nutriscan-base-url-unchanged-unless-strictly-necessary-for-build-correctness",
-      "featureTitle": "Rename the app/website user-facing name to “Calorieshivam” across the web app and Android wrapper, updating all visible branding strings (header brand label, login page title, image alt text, footer copyright, browser tab title) and Android wrapper user-facing name and documentation headings. Keep technical identifiers (e.g., Android package name, variable/resource keys like `nutriscan_base_url`) unchanged unless strictly necessary for build correctness.",
-      "files": [
-        "frontend/android-wrapper/README.md",
-        "frontend/android-wrapper/app/src/main/res/values/strings.xml",
-        "frontend/android-wrapper/settings.gradle",
-        "frontend/index.html",
         "frontend/src/components/layout/AppHeader.tsx",
-        "frontend/src/components/layout/AppLayout.tsx",
+        "frontend/src/pages/InstallAppPage.tsx",
         "frontend/src/pages/LoginPage.tsx"
       ],
       "components": [
@@ -66,7 +62,33 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-40"
+        "REQ-43"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-make-the-user-facing-app-display-name-configurable-from-a-single-place-for-both-the-web-app-header-login-tab-title-alt-text-and-the-android-wrapper-app-name-string-so-the-owner-can-choose-a-more-searchable-unique-name-without-hunting-through-multiple-files",
+      "featureTitle": "Make the user-facing app display name configurable from a single place for both the web app (header/login/tab title/alt text) and the Android wrapper (app_name string), so the owner can choose a more searchable unique name without hunting through multiple files.",
+      "files": [
+        "frontend/android-wrapper/README.md",
+        "frontend/android-wrapper/app/src/main/res/values/strings.xml",
+        "frontend/index.html",
+        "frontend/src/components/layout/AppHeader.tsx",
+        "frontend/src/components/layout/AppLayout.tsx",
+        "frontend/src/config/appBranding.ts",
+        "frontend/src/pages/LoginPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "camera@1.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-44"
       ],
       "confidence": "high"
     }
